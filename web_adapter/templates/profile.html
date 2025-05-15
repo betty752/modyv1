@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moody - Profil</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background-color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        .nav-links {
+            display: flex;
+        }
+        
+        .nav-link {
+            padding: 8px 16px;
+            margin-left: 10px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-link:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .nav-link.active {
+            border-bottom: 2px solid #4CAF50;
+            color: #4CAF50;
+        }
+        
+        .logout-btn {
+            padding: 8px 16px;
+            margin-left: 20px;
+            border: 1px solid #e74c3c;
+            background: none;
+            color: #e74c3c;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .main-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-top: 0;
+            text-align: center;
+        }
+        
+        .profile-form {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .user-info {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .user-info p {
+            margin: 5px 0;
+        }
+        
+        .user-info strong {
+            min-width: 100px;
+            display: inline-block;
+        }
+        
+        .save-btn {
+            display: block;
+            width: 100%;
+            max-width: 200px;
+            margin: 30px auto 0;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .save-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .success-message {
+            color: #4CAF50;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .menstrual-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #fff0f5; /* Light pink background for female users */
+            border-radius: 8px;
+            border-left: 4px solid #FF69B4;
+        }
+        
+        .menstrual-title {
+            color: #FF69B4;
+            margin-top: 0;
+        }
+        
+        .date-input-container {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+        
+        .date-input-container label {
+            margin-right: 10px;
+            margin-bottom: 0;
+            white-space: nowrap;
+        }
+        
+        .update-date-btn {
+            padding: 8px 16px;
+            background-color: #FF69B4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        
+        .update-date-btn:hover {
+            background-color: #FF5BA7;
+        }
+        
+        .back-btn {
+            display: block;
+            width: fit-content;
+            margin: 30px auto 0;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .back-btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">MOODY</div>
+            <div class="nav-links">
+                <button class="nav-link" onclick="window.location.href='/dashboard'">Tableau de bord</button>
+                <button class="nav-link" onclick="window.location.href='/analysis'">Analyse</button>
+                <button class="nav-link" onclick="window.location.href='/suggestions'">Suggestions</button>
+                <button class="nav-link active">Profil</button>
+            </div>
+            <button class="logout-btn">Déconnexion</button>
+        </div>
+        
+        <div class="main-content">
+            <h1>Votre profil</h1>
+            
+            <!-- Informations de l'utilisateur -->
+            <div class="user-info" id="user-info">
+                <p><strong>Nom d'utilisateur:</strong> <span id="username"></span></p>
+                <p><strong>Email:</strong> <span id="email"></span></p>
+                <p><strong>Genre:</strong> <span id="gender"></span></p>
+                <p><strong>Membre depuis:</strong> <span id="created-at"></span></p>
+            </div>
+            
+            <!-- Formulaire de profil -->
+            <div class="profile-form">
+                <div class="form-group">
+                    <label for="full-name">Nom complet</label>
+                    <input type="text" id="full-name" placeholder="Votre nom complet">
+                </div>
+                
+                <div class="form-group">
+                    <label for="age">Âge</label>
+                    <input type="number" id="age" min="1" max="120" placeholder="Votre âge">
+                </div>
+                
+                <div class="form-group">
+                    <label for="occupation">Occupation</label>
+                    <input type="text" id="occupation" placeholder="Votre métier ou activité principale">
+                </div>
+                
+                <div class="form-group">
+                    <label for="interests">Centres d'intérêt</label>
+                    <textarea id="interests" placeholder="Vos centres d'intérêt, loisirs, passions..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="goals">Objectifs personnels</label>
+                    <textarea id="goals" placeholder="Vos objectifs personnels ou professionnels..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="additional-notes">Notes supplémentaires</label>
+                    <textarea id="additional-notes" placeholder="Toute autre information pertinente..."></textarea>
+                </div>
+                
+                <button class="save-btn" id="save-profile-btn">Enregistrer les modifications</button>
+                
+                <div class="error-message" id="error-message"></div>
+                <div class="success-message" id="success-message"></div>
+            </div>
+            
+            <!-- Section cycle menstruel (pour les utilisatrices) -->
+            <div class="menstrual-section" id="menstrual-section" style="display: none;">
+                <h3 class="menstrual-title">Suivi du cycle menstruel</h3>
+                <p>Mettez à jour la date de vos dernières règles pour améliorer l'analyse des corrélations entre votre cycle et votre humeur.</p>
+                
+                <div class="date-input-container">
+                    <label for="last-period-date">Dernières règles:</label>
+                    <input type="date" id="last-period-date">
+                    <button class="update-date-btn" id="update-date-btn">Mettre à jour</button>
+                </div>
+            </div>
+            
+            <a href="/dashboard" class="back-btn">Retour au tableau de bord</a>
+        </div>
+    </div>
+    
+    <script>
+        // Variables pour stocker les informations utilisateur
+        let userData = {};
+        let profileData = {};
+        
+        // Récupérer les données du profil
+        async function fetchProfileData() {
+            try {
+                const response = await fetch('/api/get_profile');
+                const data = await response.json();
+                
+                if (data.success) {
+                    userData = data.user || {};
+                    profileData = data.profile || {};
+                    
+                    // Afficher les informations utilisateur
+                    displayUserInfo();
+                    
+                    // Remplir le formulaire
+                    populateForm();
+                    
+                    // Afficher la section de cycle menstruel si nécessaire
+                    if (userData.gender === 'F') {
+                        document.getElementById('menstrual-section').style.display = 'block';
+                        if (userData.last_menstrual_date) {
+                            document.getElementById('last-period-date').value = userData.last_menstrual_date;
+                        }
+                    }
+                } else {
+                    document.getElementById('error-message').textContent = 'Erreur lors du chargement du profil: ' + (data.message || 'Erreur inconnue');
+                }
+            } catch (error) {
+                console.error('Erreur lors de la récupération du profil:', error);
+                document.getElementById('error-message').textContent = 'Erreur lors de la connexion au serveur';
+            }
+        }
+        
+        // Afficher les informations utilisateur
+        function displayUserInfo() {
+            document.getElementById('username').textContent = userData.username || 'N/A';
+            document.getElementById('email').textContent = userData.email || 'N/A';
+            document.getElementById('gender').textContent = userData.gender === 'M' ? 'Homme' : 'Femme';
+            
+            // Formater la date de création
+            const createdAt = userData.created_at ? new Date(userData.created_at) : null;
+            document.getElementById('created-at').textContent = createdAt ? 
+                createdAt.toLocaleDateString('fr-FR', {year: 'numeric', month: 'long', day: 'numeric'}) : 'N/A';
+        }
+        
+        // Remplir le formulaire avec les données existantes
+        function populateForm() {
+            document.getElementById('full-name').value = profileData.full_name || '';
+            document.getElementById('age').value = profileData.age || '';
+            document.getElementById('occupation').value = profileData.occupation || '';
+            document.getElementById('interests').value = profileData.interests || '';
+            document.getElementById('goals').value = profileData.goals || '';
+            document.getElementById('additional-notes').value = profileData.additional_notes || '';
+        }
+        
+        // Sauvegarder les modifications du profil
+        async function saveProfile() {
+            // Récupérer les valeurs du formulaire
+            const fullName = document.getElementById('full-name').value.trim();
+            const age = document.getElementById('age').value.trim();
+            const occupation = document.getElementById('occupation').value.trim();
+            const interests = document.getElementById('interests').value.trim();
+            const goals = document.getElementById('goals').value.trim();
+            const additionalNotes = document.getElementById('additional-notes').value.trim();
+            
+            // Préparer les données
+            const profileData = {
+                full_name: fullName,
+                age: age ? parseInt(age) : null,
+                occupation: occupation,
+                interests: interests,
+                goals: goals,
+                additional_notes: additionalNotes
+            };
+            
+            try {
+                const response = await fetch('/api/update_profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(profileData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('success-message').textContent = 'Profil mis à jour avec succès!';
+                    document.getElementById('error-message').textContent = '';
+                    
+                    // Effacer le message de succès après quelques secondes
+                    setTimeout(() => {
+                        document.getElementById('success-message').textContent = '';
+                    }, 3000);
+                } else {
+                    document.getElementById('error-message').textContent = 'Erreur lors de la mise à jour du profil: ' + (data.message || 'Erreur inconnue');
+                    document.getElementById('success-message').textContent = '';
+                }
+            } catch (error) {
+                console.error('Erreur lors de la mise à jour du profil:', error);
+                document.getElementById('error-message').textContent = 'Erreur lors de la connexion au serveur';
+                document.getElementById('success-message').textContent = '';
+            }
+        }
+        
+        // Mettre à jour la date des règles
+        async function updateMenstrualDate() {
+            const dateInput = document.getElementById('last-period-date');
+            const newDate = dateInput.value;
+            
+            if (!newDate) {
+                document.getElementById('error-message').textContent = 'Veuillez sélectionner une date valide.';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/update_menstrual_date', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ date: newDate })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    userData.last_menstrual_date = newDate;
+                    document.getElementById('success-message').textContent = 'Date mise à jour avec succès!';
+                    document.getElementById('error-message').textContent = '';
+                    
+                    // Effacer le message de succès après quelques secondes
+                    setTimeout(() => {
+                        document.getElementById('success-message').textContent = '';
+                    }, 3000);
+                } else {
+                    document.getElementById('error-message').textContent = 'Erreur lors de la mise à jour de la date: ' + (data.message || 'Erreur inconnue');
+                    document.getElementById('success-message').textContent = '';
+                }
+            } catch (error) {
+                console.error('Erreur lors de la mise à jour de la date:', error);
+                document.getElementById('error-message').textContent = 'Erreur lors de la connexion au serveur';
+                document.getElementById('success-message').textContent = '';
+            }
+        }
+        
+        // Gérer la déconnexion
+        document.querySelector('.logout-btn').addEventListener('click', async function() {
+            try {
+                const response = await fetch('/api/logout', {
+                    method: 'POST',
+                });
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = data.redirect || '/';
+                }
+            } catch (error) {
+                console.error('Erreur lors de la déconnexion:', error);
+                window.location.href = '/';
+            }
+        });
+        
+        // Écouteurs d'événements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Charger les données du profil
+            fetchProfileData();
+            
+            // Écouteur pour le bouton de sauvegarde du profil
+            document.getElementById('save-profile-btn').addEventListener('click', saveProfile);
+            
+            // Écouteur pour le bouton de mise à jour de la date des règles
+            document.getElementById('update-date-btn').addEventListener('click', updateMenstrualDate);
+        });
+    </script>
+</body>
+</html>

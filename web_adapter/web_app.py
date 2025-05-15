@@ -45,6 +45,36 @@ def dashboard():
     # User is logged in, render the dashboard
     return render_template('dashboard.html')
 
+@app.route('/suggestions')
+def suggestions():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        # User is not logged in, redirect to login page
+        return redirect(url_for('index'))
+    
+    # User is logged in, render the suggestions page
+    return render_template('suggestions.html')
+
+@app.route('/analysis')
+def analysis():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        # User is not logged in, redirect to login page
+        return redirect(url_for('index'))
+    
+    # User is logged in, render the analysis page
+    return render_template('analysis.html')
+
+@app.route('/profile')
+def profile():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        # User is not logged in, redirect to login page
+        return redirect(url_for('index'))
+    
+    # User is logged in, render the profile page
+    return render_template('profile.html')
+
 @app.route('/static/<path:path>')
 def serve_static(path):
     return send_from_directory('static', path)
@@ -139,7 +169,34 @@ def get_mood_history():
     days = request.args.get('days', default=30, type=int)
     entries = db.get_user_mood_entries(user_data['id'], days)
     
-    return jsonify({'success': True, 'entries': entries})
+    return jsonify({
+        'success': True, 
+        'entries': entries, 
+        'user_gender': user_data.get('gender'),
+        'last_menstrual_date': user_data.get('last_menstrual_date')
+    })
+
+@app.route('/api/get_latest_mood', methods=['GET'])
+def get_latest_mood():
+    global user_data, current_mood
+    
+    if not user_data:
+        return jsonify({'success': False, 'message': 'Not authenticated'})
+    
+    # Get the last mood entry (we'll just get the last 1 day of entries and take the most recent)
+    entries = db.get_user_mood_entries(user_data['id'], 1)
+    
+    if entries and len(entries) > 0:
+        # Return the most recent entry
+        return jsonify({
+            'success': True,
+            'mood': entries[0]
+        })
+    else:
+        return jsonify({
+            'success': False,
+            'message': 'No mood entries found'
+        })
 
 @app.route('/api/profile', methods=['GET'])
 def get_profile():

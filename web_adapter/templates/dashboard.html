@@ -423,8 +423,9 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Redirect to suggestions page
+                    // Redirect to suggestions page and reset the error message
                     window.location.href = '/suggestions';
+                    errorMessage.textContent = '';
                 } else {
                     errorMessage.textContent = data.message || "Échec de l'enregistrement de l'humeur";
                 }
