@@ -1,162 +1,162 @@
-# Moody - Mood Tracking Application Documentation
+# Moody - Application de Suivi d'Humeur
 
-## Overview
+## Aperçu Général
 
-Moody is a comprehensive mood tracking application developed with Python and Tkinter. The application helps users monitor their emotional states and receive personalized recommendations to improve their well-being. Moody features gender-specific functionality, including menstrual cycle tracking for female users to identify correlations between hormonal changes and mood patterns.
+Moody est une application complète de suivi d'humeur développée avec Python et Flask. L'application aide les utilisateurs à surveiller leur état émotionnel et à recevoir des recommandations personnalisées pour améliorer leur bien-être. Moody propose des fonctionnalités spécifiques au genre, notamment le suivi du cycle menstruel pour les utilisatrices afin d'identifier les corrélations entre les changements hormonaux et les tendances d'humeur.
 
-## Features
+## Fonctionnalités
 
-### User Authentication
+### Authentification des Utilisateurs
 
-- **Registration**: Users can create accounts by providing basic information:
-  - Username
+- **Inscription**: Les utilisateurs peuvent créer des comptes en fournissant des informations de base:
+  - Nom d'utilisateur
   - Email
-  - Password
-  - Gender selection (Male/Female)
-  - Last menstrual period date (for female users)
+  - Mot de passe
+  - Sélection du genre (Homme/Femme)
+  - Date des dernières règles (pour les utilisatrices)
   
-- **Login**: Secure authentication system for returning users
+- **Connexion**: Système d'authentification sécurisé pour les utilisateurs existants
 
-### Dashboard
+### Tableau de Bord
 
-The main interface where users can record their daily mood by:
+L'interface principale où les utilisateurs peuvent enregistrer leur humeur quotidienne en:
 
-- Answering three key questions about their:
-  1. Energy levels (Low/Moderate/High)
-  2. Stress levels (Low/Moderate/High)
-  3. Overall satisfaction (Not satisfied/Somewhat satisfied/Very satisfied)
+- Répondant à trois questions clés sur leur:
+  1. Niveau d'énergie (Faible/Modéré/Élevé)
+  2. Niveau de stress (Faible/Modéré/Élevé)
+  3. Satisfaction générale (Non satisfait/Moyennement satisfait/Très satisfait)
   
-- Selecting an emoji that best represents their current emotional state:
-  - Very Happy (😄)
-  - Happy (🙂)
-  - Neutral (😐)
-  - Sad (😔)
-  - Very Sad (😢)
-  - Angry (😡)
-  - Tired (😴)
-  - Anxious (😰)
+- Sélectionnant un emoji qui représente le mieux leur état émotionnel actuel:
+  - Très Heureux (😄)
+  - Heureux (🙂)
+  - Neutre (😐)
+  - Triste (😔)
+  - Très Triste (😢)
+  - En colère (😡)
+  - Fatigué (😴)
+  - Anxieux (😰)
   
-- Adding optional notes about their day
+- Ajoutant des notes optionnelles sur leur journée
 
-### Analysis
+### Analyse
 
-A data visualization section that helps users understand patterns in their mood:
+Une section de visualisation de données qui aide les utilisateurs à comprendre les tendances de leur humeur:
 
-- **Mood Timeline**: Chronological graph showing mood evolution over time
-- **Emotion Distribution**: Pie chart displaying the frequency of different emotions
-- **Question Averages**: Bar chart showing average responses to the three assessment questions
-- **Menstrual Cycle Correlation** (for female users): Visual representation of the relationship between cycle phases and mood
+- **Chronologie de l'Humeur**: Graphique chronologique montrant l'évolution de l'humeur au fil du temps
+- **Distribution des Émotions**: Diagramme circulaire affichant la fréquence des différentes émotions
+- **Moyennes des Questions**: Diagramme à barres montrant les réponses moyennes aux trois questions d'évaluation
+- **Corrélation avec le Cycle Menstruel** (pour les utilisatrices): Représentation visuelle de la relation entre les phases du cycle et l'humeur
 
-Users can filter data by different time periods:
-- 7 days
-- 30 days
-- 90 days
-- All recorded data
+Les utilisateurs peuvent filtrer les données par différentes périodes:
+- 7 jours
+- 30 jours
+- 90 jours
+- Toutes les données enregistrées
 
 ### Suggestions
 
-Personalized recommendations based on the user's current emotional state:
+Recommandations personnalisées basées sur l'état émotionnel actuel de l'utilisateur:
 
-- **For Positive Moods** (Happy, Very Happy):
-  - Uplifting music recommendations
-  - Activities to maintain positivity
-  - Energizing videos
-  - Inspirational quotes
+- **Pour les Humeurs Positives** (Heureux, Très Heureux):
+  - Recommandations de musique inspirante
+  - Activités pour maintenir la positivité
+  - Vidéos énergisantes
+  - Citations inspirantes
 
-- **For Neutral Moods**:
-  - Thought-provoking quotes
-  - Mood-lifting music
-  - Activities to boost mood
-  - Relaxing and inspiring videos
+- **Pour les Humeurs Neutres**:
+  - Citations stimulantes
+  - Musique pour améliorer l'humeur
+  - Activités pour booster l'humeur
+  - Vidéos relaxantes et inspirantes
 
-- **For Negative Moods** (Sad, Very Sad, Angry, Tired, Anxious):
-  - Comforting quotes
-  - Calming music recommendations
-  - Self-care activities
-  - Relaxation videos tailored to specific emotions
-  - Period-specific suggestions for female users during menstruation
+- **Pour les Humeurs Négatives** (Triste, Très Triste, En colère, Fatigué, Anxieux):
+  - Citations réconfortantes
+  - Recommandations de musique apaisante
+  - Activités d'auto-soins
+  - Vidéos de relaxation adaptées à des émotions spécifiques
+  - Suggestions spécifiques pour les utilisatrices pendant les menstruations
 
-### Profile
+### Profil
 
-A section where users can manage their personal information:
+Une section où les utilisateurs peuvent gérer leurs informations personnelles:
 
-- Display of basic account information (username, gender)
-- Editable profile details:
-  - Full name
-  - Age
-  - Occupation
-  - Interests
-  - Goals
-  - Additional notes
-- Menstrual cycle date management (for female users)
+- Affichage des informations de base du compte (nom d'utilisateur, genre)
+- Détails du profil modifiables:
+  - Nom complet
+  - Âge
+  - Profession
+  - Intérêts
+  - Objectifs
+  - Notes supplémentaires
+- Gestion des dates du cycle menstruel (pour les utilisatrices)
 
-## Technical Architecture
+## Architecture Technique
 
 ### Frontend
 
-- **Tkinter**: Python's standard GUI toolkit for the user interface
-- **ttk**: Themed widgets for improved aesthetics
-- **Matplotlib**: Integration for data visualization (charts and graphs)
-- **PIL/Pillow**: Image handling for emojis and icons
+- **HTML/CSS/JavaScript**: Interface utilisateur web responsive
+- **Flask**: Framework web Python pour servir l'application
+- **Chart.js**: Bibliothèque JavaScript pour les visualisations de données et graphiques
+- **Icons SVG/CSS**: Icônes et emojis stylisés
 
-### Database
+### Base de Données
 
-- **SQLite**: Lightweight relational database for data persistence
+- **SQLite**: Base de données relationnelle légère pour la persistance des données
 - **Tables**:
-  - `users`: Stores user account information
-  - `mood_entries`: Records all mood tracking data
-  - `profile_info`: Contains user profile details
+  - `users`: Stocke les informations des comptes utilisateurs
+  - `mood_entries`: Enregistre toutes les données de suivi d'humeur
+  - `profile_info`: Contient les détails du profil utilisateur
 
 ### Design
 
-- **Gender-Specific Theming**: 
-  - Pink color scheme for female users
-  - Blue color scheme for male users
-- **Modern Interface**: Clean and intuitive design
-- **Responsive Layout**: Adapts to window resizing
+- **Thème Spécifique au Genre**: 
+  - Schéma de couleurs rose pour les utilisatrices
+  - Schéma de couleurs bleu pour les utilisateurs masculins
+- **Interface Moderne**: Design épuré et intuitif
+- **Mise en Page Responsive**: S'adapte à différentes tailles d'écran
 
-## Using the Application
+## Utilisation de l'Application
 
-### First-Time Setup
+### Première Configuration
 
-1. Launch the application
-2. Select "Create Account" on the login screen
-3. Fill in the required information
-4. For female users, enter the last menstrual period date
-5. Submit to create your account
+1. Accédez à l'application dans votre navigateur
+2. Sélectionnez "Créer un compte" sur l'écran de connexion
+3. Remplissez les informations requises
+4. Pour les utilisatrices, entrez la date des dernières règles
+5. Soumettez pour créer votre compte
 
-### Daily Mood Tracking
+### Suivi Quotidien de l'Humeur
 
-1. Log in to your account
-2. On the Dashboard, answer the three mood assessment questions
-3. Select an emoji that best represents your overall mood
-4. Add any notes about your day (optional)
-5. Click "Save Mood Entry" to record your mood
+1. Connectez-vous à votre compte
+2. Sur le Tableau de Bord, répondez aux trois questions d'évaluation de l'humeur
+3. Sélectionnez un emoji qui représente le mieux votre humeur générale
+4. Ajoutez des notes sur votre journée (facultatif)
+5. Cliquez sur "Enregistrer l'humeur" pour sauvegarder votre entrée
 
-### Viewing Analysis
+### Consultation des Analyses
 
-1. Navigate to the Analysis page using the navigation buttons
-2. Select your preferred time period (7, 30, 90 days, or All)
-3. Explore the different charts to identify patterns
-4. Female users can view cycle correlations and update period dates if needed
+1. Naviguez vers la page Analyse en utilisant le menu de navigation
+2. Sélectionnez votre période préférée (7, 30, 90 jours, ou Tout)
+3. Explorez les différents graphiques pour identifier des tendances
+4. Les utilisatrices peuvent voir les corrélations avec leur cycle et mettre à jour les dates si nécessaire
 
-### Getting Recommendations
+### Obtention de Recommandations
 
-1. After recording your mood, you'll be automatically directed to the Suggestions page
-2. Alternatively, navigate to Suggestions using the navigation buttons
-3. Explore personalized recommendations based on your current mood
-4. Click on music or video links to open them in your web browser
+1. Après avoir enregistré votre humeur, vous serez automatiquement dirigé vers la page Suggestions
+2. Alternativement, naviguez vers Suggestions en utilisant le menu de navigation
+3. Explorez les recommandations personnalisées basées sur votre humeur actuelle
+4. Cliquez sur les liens de musique ou de vidéo pour les ouvrir dans votre navigateur
 
-### Managing Your Profile
+### Gestion de Votre Profil
 
-1. Navigate to the Profile page using the navigation buttons
-2. View your account information
-3. Fill in or update your profile details
-4. Click "Update Profile" to save changes
+1. Naviguez vers la page Profil en utilisant le menu de navigation
+2. Consultez les informations de votre compte
+3. Remplissez ou mettez à jour les détails de votre profil
+4. Cliquez sur "Mettre à jour le profil" pour enregistrer les modifications
 
-## Database Schema
+## Schéma de la Base de Données
 
-### users Table
+### Table users
 - `id`: INTEGER PRIMARY KEY
 - `username`: TEXT UNIQUE NOT NULL
 - `email`: TEXT UNIQUE NOT NULL
@@ -165,9 +165,9 @@ A section where users can manage their personal information:
 - `last_menstrual_date`: TEXT
 - `created_at`: TIMESTAMP
 
-### mood_entries Table
+### Table mood_entries
 - `id`: INTEGER PRIMARY KEY
-- `user_id`: INTEGER NOT NULL (Foreign key to users.id)
+- `user_id`: INTEGER NOT NULL (Clé étrangère vers users.id)
 - `date`: TEXT NOT NULL
 - `question1_answer`: INTEGER NOT NULL
 - `question2_answer`: INTEGER NOT NULL
@@ -176,9 +176,9 @@ A section where users can manage their personal information:
 - `notes`: TEXT
 - `created_at`: TIMESTAMP
 
-### profile_info Table
+### Table profile_info
 - `id`: INTEGER PRIMARY KEY
-- `user_id`: INTEGER UNIQUE NOT NULL (Foreign key to users.id)
+- `user_id`: INTEGER UNIQUE NOT NULL (Clé étrangère vers users.id)
 - `full_name`: TEXT
 - `age`: INTEGER
 - `occupation`: TEXT
@@ -187,56 +187,56 @@ A section where users can manage their personal information:
 - `additional_notes`: TEXT
 - `updated_at`: TIMESTAMP
 
-## Security Features
+## Fonctionnalités de Sécurité
 
-- **Password Hashing**: User passwords are stored as SHA-256 hashes, not plain text
-- **Input Validation**: Form inputs are validated to prevent injection attacks
-- **Secure Database**: SQLite database with proper constraints and relationships
+- **Hachage des Mots de Passe**: Les mots de passe des utilisateurs sont stockés sous forme de hachages SHA-256, pas en texte brut
+- **Validation des Entrées**: Les entrées de formulaire sont validées pour prévenir les attaques par injection
+- **Base de Données Sécurisée**: Base de données SQLite avec des contraintes et relations appropriées
 
-## Future Enhancements
+## Améliorations Futures
 
-Potential improvements for future versions:
+Améliorations potentielles pour les versions futures:
 
-1. **Export Functionality**: Allow users to export their mood data
-2. **Notifications**: Reminders to track mood daily
-3. **Advanced Analytics**: More sophisticated pattern recognition
-4. **Social Features**: Optional sharing of mood insights with trusted contacts
-5. **External App Integration**: Synchronization with other health and fitness applications
+1. **Fonctionnalité d'Exportation**: Permettre aux utilisateurs d'exporter leurs données d'humeur
+2. **Notifications**: Rappels pour suivre l'humeur quotidiennement
+3. **Analyses Avancées**: Reconnaissance de motifs plus sophistiquée
+4. **Fonctionnalités Sociales**: Partage optionnel des insights d'humeur avec des contacts de confiance
+5. **Intégration d'Applications Externes**: Synchronisation avec d'autres applications de santé et de fitness
 
-## Troubleshooting
+## Dépannage
 
-### Common Issues
+### Problèmes Courants
 
-1. **Login Problems**:
-   - Verify your username and password
-   - Ensure you've registered an account
+1. **Problèmes de Connexion**:
+   - Vérifiez votre nom d'utilisateur et mot de passe
+   - Assurez-vous d'avoir créé un compte
 
-2. **Chart Display Issues**:
-   - Confirm you have recorded mood entries for the selected time period
-   - Check if Matplotlib is properly installed
+2. **Problèmes d'Affichage des Graphiques**:
+   - Confirmez que vous avez enregistré des entrées d'humeur pour la période sélectionnée
+   - Vérifiez que votre navigateur supporte JavaScript et Chart.js
 
-3. **Database Errors**:
-   - Ensure the application has write permissions to the directory
-   - Verify the database file isn't corrupted
+3. **Erreurs de Base de Données**:
+   - Assurez-vous que l'application a les permissions d'écriture dans le répertoire
+   - Vérifiez que le fichier de base de données n'est pas corrompu
 
-### Getting Help
+### Obtenir de l'Aide
 
-If you encounter issues not covered in this documentation:
+Si vous rencontrez des problèmes non couverts dans cette documentation:
 
-1. Check the console output for error messages
-2. Verify all Python dependencies are installed
-3. Ensure your Python version is compatible (Python 3.x recommended)
+1. Vérifiez la console de développement de votre navigateur pour les messages d'erreur
+2. Assurez-vous que le serveur Flask est en cours d'exécution
+3. Vérifiez que votre navigateur est à jour et compatible
 
-## License
+## Licence
 
-This application is provided as-is without any warranties. All rights reserved.
+Cette application est fournie telle quelle sans aucune garantie. Tous droits réservés.
 
-## Credits
+## Crédits
 
-- Developed using Python, Tkinter, and SQLite
-- Uses Matplotlib for data visualization
-- Emoji designs adapted for cross-platform compatibility
+- Développée avec Python, Flask, HTML/CSS/JavaScript et SQLite
+- Utilise Chart.js pour la visualisation des données
+- Conçue pour une expérience utilisateur optimale
 
 ---
 
-*Last updated: 2023*
+*Dernière mise à jour: Mai 2025*
