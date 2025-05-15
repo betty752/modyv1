@@ -302,7 +302,7 @@
                 const days = document.getElementById('date-range').value;
                 
                 // Récupérer les données d'humeur
-                const response = await fetch(`/api/get_mood_history?days=${days}`);
+                const response = await fetch(`/api/mood_history?days=${days}`);
                 const data = await response.json();
                 
                 if (data.success) {

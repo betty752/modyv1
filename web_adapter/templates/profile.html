@@ -314,7 +314,7 @@
         // Récupérer les données du profil
         async function fetchProfileData() {
             try {
-                const response = await fetch('/api/get_profile');
+                const response = await fetch('/api/profile');
                 const data = await response.json();
                 
                 if (data.success) {
