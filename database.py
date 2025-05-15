@@ -387,18 +387,22 @@ class Database:
             Dictionary with mood statistics
         """
         try:
+            # Obtenir une connexion
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
             # Get counts of different emoji choices
-            self.cursor.execute('''
+            cursor.execute('''
             SELECT emoji_choice, COUNT(*) 
             FROM mood_entries 
             WHERE user_id = ? 
             GROUP BY emoji_choice
             ''', (user_id,))
             
-            emoji_counts = {emoji: count for emoji, count in self.cursor.fetchall()}
+            emoji_counts = {emoji: count for emoji, count in cursor.fetchall()}
             
             # Get average answers to questions
-            self.cursor.execute('''
+            cursor.execute('''
             SELECT 
                 AVG(question1_answer) as avg_q1, 
                 AVG(question2_answer) as avg_q2, 
@@ -407,13 +411,14 @@ class Database:
             WHERE user_id = ?
             ''', (user_id,))
             
-            avgs = self.cursor.fetchone()
+            avgs = cursor.fetchone()
+            self.close(conn)
             
             return {
                 "emoji_counts": emoji_counts,
-                "avg_question1": avgs[0] if avgs[0] else 0,
-                "avg_question2": avgs[1] if avgs[1] else 0,
-                "avg_question3": avgs[2] if avgs[2] else 0
+                "avg_question1": avgs[0] if avgs and avgs[0] else 0,
+                "avg_question2": avgs[1] if avgs and avgs[1] else 0,
+                "avg_question3": avgs[2] if avgs and avgs[2] else 0
             }
         except sqlite3.Error as e:
             print(f"Get statistics error: {e}")
