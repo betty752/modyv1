@@ -17,29 +17,29 @@ class Database:
             db_name: The name of the database file
         """
         self.db_name = db_name
-        self.conn = None
-        self.cursor = None
-        self.connect()
+        # Configuration pour que chaque thread obtienne sa propre connexion
         self.create_tables()
     
-    def connect(self) -> None:
-        """Establish connection to the SQLite database."""
-        try:
-            self.conn = sqlite3.connect(self.db_name)
-            self.cursor = self.conn.cursor()
-        except sqlite3.Error as e:
-            print(f"Database connection error: {e}")
+    def get_connection(self):
+        """Obtient une connexion à la base de données."""
+        # Crée une nouvelle connexion pour chaque opération
+        conn = sqlite3.connect(self.db_name, check_same_thread=False)
+        conn.row_factory = sqlite3.Row  # Pour obtenir les résultats sous forme de dictionnaires
+        return conn
     
-    def close(self) -> None:
-        """Close the database connection."""
-        if self.conn:
-            self.conn.close()
+    def close(self, conn) -> None:
+        """Ferme la connexion à la base de données."""
+        if conn:
+            conn.close()
     
     def create_tables(self) -> None:
         """Create all necessary tables for the application if they don't exist."""
         try:
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
             # Users table
-            self.cursor.execute('''
+            cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE NOT NULL,
@@ -52,7 +52,7 @@ class Database:
             ''')
             
             # Mood entries table
-            self.cursor.execute('''
+            cursor.execute('''
             CREATE TABLE IF NOT EXISTS mood_entries (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,
@@ -68,7 +68,7 @@ class Database:
             ''')
             
             # Profile information table
-            self.cursor.execute('''
+            cursor.execute('''
             CREATE TABLE IF NOT EXISTS profile_info (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER UNIQUE NOT NULL,
@@ -83,7 +83,8 @@ class Database:
             )
             ''')
             
-            self.conn.commit()
+            conn.commit()
+            self.close(conn)
         except sqlite3.Error as e:
             print(f"Table creation error: {e}")
     
@@ -103,22 +104,27 @@ class Database:
             Boolean indicating success
         """
         try:
+            # Obtenir une connexion
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
             # Hash the password
             password_hash = hashlib.sha256(password.encode()).hexdigest()
             
             # Insert user data
-            self.cursor.execute('''
+            cursor.execute('''
             INSERT INTO users (username, email, password_hash, gender, last_menstrual_date) 
             VALUES (?, ?, ?, ?, ?)
             ''', (username, email, password_hash, gender, last_menstrual_date))
             
             # Create an empty profile for the user
-            user_id = self.cursor.lastrowid
-            self.cursor.execute('''
+            user_id = cursor.lastrowid
+            cursor.execute('''
             INSERT INTO profile_info (user_id) VALUES (?)
             ''', (user_id,))
             
-            self.conn.commit()
+            conn.commit()
+            self.close(conn)
             return True
         except sqlite3.IntegrityError:
             # Username or email already exists
@@ -139,25 +145,32 @@ class Database:
             User data dictionary if authenticated, None otherwise
         """
         try:
+            # Obtenir une connexion
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
             # Hash the provided password
             password_hash = hashlib.sha256(password.encode()).hexdigest()
             
             # Check credentials
-            self.cursor.execute('''
+            cursor.execute('''
             SELECT id, username, email, gender, last_menstrual_date 
             FROM users 
             WHERE username = ? AND password_hash = ?
             ''', (username, password_hash))
             
-            user = self.cursor.fetchone()
+            user = cursor.fetchone()
             if user:
-                return {
+                user_data = {
                     "id": user[0],
                     "username": user[1],
                     "email": user[2],
                     "gender": user[3],
                     "last_menstrual_date": user[4]
                 }
+                self.close(conn)
+                return user_data
+            self.close(conn)
             return None
         except sqlite3.Error as e:
             print(f"Authentication error: {e}")
@@ -180,15 +193,20 @@ class Database:
             Boolean indicating success
         """
         try:
+            # Obtenir une connexion
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
             current_date = datetime.datetime.now().strftime('%Y-%m-%d')
             
-            self.cursor.execute('''
+            cursor.execute('''
             INSERT INTO mood_entries 
             (user_id, date, question1_answer, question2_answer, question3_answer, emoji_choice, notes) 
             VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', (user_id, current_date, question1, question2, question3, emoji, notes))
             
-            self.conn.commit()
+            conn.commit()
+            self.close(conn)
             return True
         except sqlite3.Error as e:
             print(f"Mood entry error: {e}")
@@ -206,18 +224,22 @@ class Database:
             List of mood entry dictionaries
         """
         try:
+            # Obtenir une connexion
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
             # Calculate the date N days ago
             past_date = (datetime.datetime.now() - datetime.timedelta(days=days)).strftime('%Y-%m-%d')
             
-            self.cursor.execute('''
+            cursor.execute('''
             SELECT id, date, question1_answer, question2_answer, question3_answer, emoji_choice, notes 
             FROM mood_entries 
             WHERE user_id = ? AND date >= ? 
             ORDER BY date ASC
             ''', (user_id, past_date))
             
-            entries = self.cursor.fetchall()
-            return [
+            entries = cursor.fetchall()
+            result = [
                 {
                     "id": entry[0],
                     "date": entry[1],
@@ -229,6 +251,8 @@ class Database:
                 }
                 for entry in entries
             ]
+            self.close(conn)
+            return result
         except sqlite3.Error as e:
             print(f"Get mood entries error: {e}")
             return []
@@ -244,13 +268,19 @@ class Database:
             Dictionary with profile information
         """
         try:
-            self.cursor.execute('''
+            # Obtenir une connexion
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute('''
             SELECT full_name, age, occupation, interests, goals, additional_notes 
             FROM profile_info 
             WHERE user_id = ?
             ''', (user_id,))
             
-            profile = self.cursor.fetchone()
+            profile = cursor.fetchone()
+            self.close(conn)
+            
             if profile:
                 return {
                     "full_name": profile[0] or "",
@@ -291,7 +321,11 @@ class Database:
             Boolean indicating success
         """
         try:
-            self.cursor.execute('''
+            # Obtenir une connexion
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute('''
             UPDATE profile_info 
             SET full_name = ?, age = ?, occupation = ?, interests = ?, goals = ?, additional_notes = ?, 
                 updated_at = CURRENT_TIMESTAMP 
@@ -306,7 +340,8 @@ class Database:
                 user_id
             ))
             
-            self.conn.commit()
+            conn.commit()
+            self.close(conn)
             return True
         except sqlite3.Error as e:
             print(f"Update profile error: {e}")
@@ -324,13 +359,18 @@ class Database:
             Boolean indicating success
         """
         try:
-            self.cursor.execute('''
+            # Obtenir une connexion
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute('''
             UPDATE users 
             SET last_menstrual_date = ? 
             WHERE id = ?
             ''', (date, user_id))
             
-            self.conn.commit()
+            conn.commit()
+            self.close(conn)
             return True
         except sqlite3.Error as e:
             print(f"Update menstrual date error: {e}")
