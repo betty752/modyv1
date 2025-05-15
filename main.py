@@ -143,7 +143,16 @@ def main():
     root.protocol("WM_DELETE_WINDOW", on_closing)
     
     # Start the application main loop
-    root.mainloop()
+    if os.environ.get('REPLIT_HEADLESS'):
+        # Running in headless mode (like on Replit)
+        print("Application is running headless - server mode")
+        # On Replit, just keep the script running
+        import time
+        while True:
+            time.sleep(1)
+    else:
+        # Start the application main loop
+        root.mainloop()
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moody - Tableau de bord</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background-color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        .nav-links {
+            display: flex;
+        }
+        
+        .nav-link {
+            padding: 8px 16px;
+            margin-left: 10px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-link:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .nav-link.active {
+            border-bottom: 2px solid #4CAF50;
+            color: #4CAF50;
+        }
+        
+        .logout-btn {
+            padding: 8px 16px;
+            margin-left: 20px;
+            border: 1px solid #e74c3c;
+            background: none;
+            color: #e74c3c;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .main-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        
+        .current-date {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .question-box {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .option-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .emoji-selection {
+            text-align: center;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .emoji-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .emoji-btn {
+            font-size: 2rem;
+            background: none;
+            border: 2px solid transparent;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .emoji-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .emoji-btn.selected {
+            border-color: #4CAF50;
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+        
+        .selected-emoji {
+            font-size: 1.2rem;
+            margin-top: 10px;
+        }
+        
+        .notes-section {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        
+        .save-btn {
+            display: block;
+            width: 100%;
+            max-width: 200px;
+            margin: 0 auto;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .save-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        /* Gender-specific colors can be applied based on user gender */
+        .female-theme {
+            --theme-color: #FFB6C1;
+        }
+        
+        .male-theme {
+            --theme-color: #ADD8E6;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                padding: 15px;
+            }
+            
+            .logo {
+                margin-bottom: 15px;
+            }
+            
+            .nav-links {
+                margin-bottom: 15px;
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .nav-link, .logout-btn {
+                margin: 5px;
+            }
+            
+            .options {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .emoji-container {
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">MOODY</div>
+            <div class="nav-links">
+                <button class="nav-link active">Tableau de bord</button>
+                <button class="nav-link">Analyse</button>
+                <button class="nav-link">Suggestions</button>
+                <button class="nav-link">Profil</button>
+            </div>
+            <button class="logout-btn">Déconnexion</button>
+        </div>
+        
+        <div class="main-content">
+            <h1>Comment vous sentez-vous aujourd'hui?</h1>
+            <p class="current-date" id="current-date"></p>
+            
+            <div class="questions-container">
+                <!-- Question 1 -->
+                <div class="question-box">
+                    <h3>1. Comment est votre niveau d'énergie aujourd'hui?</h3>
+                    <div class="options">
+                        <label class="option-label">
+                            <input type="radio" name="question1" value="1">
+                            Faible énergie
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="question1" value="2">
+                            Énergie modérée
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="question1" value="3">
+                            Énergie élevée
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Question 2 -->
+                <div class="question-box">
+                    <h3>2. Comment évalueriez-vous votre niveau de stress?</h3>
+                    <div class="options">
+                        <label class="option-label">
+                            <input type="radio" name="question2" value="1">
+                            Stress faible
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="question2" value="2">
+                            Stress modéré
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="question2" value="3">
+                            Stress élevé
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Question 3 -->
+                <div class="question-box">
+                    <h3>3. Êtes-vous satisfait(e) de votre journée?</h3>
+                    <div class="options">
+                        <label class="option-label">
+                            <input type="radio" name="question3" value="1">
+                            Pas satisfait(e)
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="question3" value="2">
+                            Moyennement satisfait(e)
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="question3" value="3">
+                            Très satisfait(e)
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Emoji Selection -->
+            <div class="emoji-selection">
+                <h2>Comment décririez-vous votre humeur globale?</h2>
+                <div class="emoji-container">
+                    <button class="emoji-btn" data-value="very_happy">😄</button>
+                    <button class="emoji-btn" data-value="happy">🙂</button>
+                    <button class="emoji-btn" data-value="neutral">😐</button>
+                    <button class="emoji-btn" data-value="sad">😔</button>
+                    <button class="emoji-btn" data-value="very_sad">😢</button>
+                    <button class="emoji-btn" data-value="angry">😡</button>
+                    <button class="emoji-btn" data-value="tired">😴</button>
+                    <button class="emoji-btn" data-value="anxious">😰</button>
+                </div>
+                <div class="selected-emoji" id="selected-emoji"></div>
+            </div>
+            
+            <!-- Notes section -->
+            <div class="notes-section">
+                <h3>Notes supplémentaires:</h3>
+                <textarea id="notes" placeholder="Ajoutez des notes sur votre journée..."></textarea>
+            </div>
+            
+            <button class="save-btn" id="save-btn">Enregistrer</button>
+            <div class="error-message" id="error-message"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Set current date
+        function getCurrentDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date().toLocaleDateString('fr-FR', options);
+        }
+        document.getElementById('current-date').textContent = getCurrentDate();
+        
+        // Emoji selection
+        const emojiBtns = document.querySelectorAll('.emoji-btn');
+        const selectedEmoji = document.getElementById('selected-emoji');
+        let selectedEmojiValue = '';
+        
+        const emojiLabels = {
+            'very_happy': 'Très Heureux',
+            'happy': 'Heureux',
+            'neutral': 'Neutre',
+            'sad': 'Triste',
+            'very_sad': 'Très Triste',
+            'angry': 'En colère',
+            'tired': 'Fatigué',
+            'anxious': 'Anxieux'
+        };
+        
+        emojiBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove selected class from all buttons
+                emojiBtns.forEach(b => b.classList.remove('selected'));
+                
+                // Add selected class to clicked button
+                this.classList.add('selected');
+                
+                // Update selected emoji value
+                selectedEmojiValue = this.dataset.value;
+                
+                // Update display text
+                selectedEmoji.textContent = `Sélectionné: ${this.textContent} ${emojiLabels[selectedEmojiValue]}`;
+            });
+        });
+        
+        // Form submission
+        document.getElementById('save-btn').addEventListener('click', function() {
+            const question1 = document.querySelector('input[name="question1"]:checked');
+            const question2 = document.querySelector('input[name="question2"]:checked');
+            const question3 = document.querySelector('input[name="question3"]:checked');
+            const notes = document.getElementById('notes').value;
+            const errorMessage = document.getElementById('error-message');
+            
+            // Validate inputs
+            if (!question1 || !question2 || !question3) {
+                errorMessage.textContent = 'Veuillez répondre à toutes les questions';
+                return;
+            }
+            
+            if (!selectedEmojiValue) {
+                errorMessage.textContent = 'Veuillez sélectionner une émotion';
+                return;
+            }
+            
+            // Clear error message
+            errorMessage.textContent = '';
+            
+            // Prepare data for submission
+            const data = {
+                question1: parseInt(question1.value),
+                question2: parseInt(question2.value),
+                question3: parseInt(question3.value),
+                emoji: selectedEmojiValue,
+                notes: notes
+            };
+            
+            // Submit data to server
+            fetch('/api/save_mood', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Redirect to suggestions page
+                    window.location.href = '/suggestions';
+                } else {
+                    errorMessage.textContent = data.message || "Échec de l'enregistrement de l'humeur";
+                }
+            })
+            .catch(error => {
+                errorMessage.textContent = 'Erreur de connexion au serveur';
+                console.error('Error:', error);
+            });
+        });
+        
+        // Navigation
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                const page = this.textContent.toLowerCase();
+                if (page !== 'tableau de bord') {
+                    // Determine the URL for each page
+                    let url;
+                    switch(page) {
+                        case 'analyse':
+                            url = '/analysis';
+                            break;
+                        case 'suggestions':
+                            url = '/suggestions';
+                            break;
+                        case 'profil':
+                            url = '/profile';
+                            break;
+                        default:
+                            url = '/dashboard';
+                    }
+                    window.location.href = url;
+                }
+            });
+        });
+        
+        // Logout
+        document.querySelector('.logout-btn').addEventListener('click', function() {
+            fetch('/api/logout', {
+                method: 'POST',
+            })
+            .then(() => {
+                window.location.href = '/';
+            })
+            .catch(error => {
+                console.error('Error logging out:', error);
+            });
+        });
+    </script>
+</body>
+</html>

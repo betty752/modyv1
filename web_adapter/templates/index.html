@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moody - Suivi de l'humeur</title>
+    <link rel="stylesheet" href="{{ url_for('serve_static', path='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Authentication Section -->
+        <div id="auth-section" v-if="!user">
+            <div class="auth-container">
+                <h1 class="app-title">MOODY</h1>
+                <div class="tabs">
+                    <button :class="['tab-btn', {active: authMode === 'login'}]" @click="authMode = 'login'">Se connecter</button>
+                    <button :class="['tab-btn', {active: authMode === 'register'}]" @click="authMode = 'register'">Créer un compte</button>
+                </div>
+                
+                <!-- Login Form -->
+                <div v-if="authMode === 'login'" class="auth-form">
+                    <div class="form-group">
+                        <label for="login-username">Nom d'utilisateur</label>
+                        <input type="text" id="login-username" v-model="loginForm.username" placeholder="Votre nom d'utilisateur">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Mot de passe</label>
+                        <input type="password" id="login-password" v-model="loginForm.password" placeholder="Votre mot de passe">
+                    </div>
+                    <button class="primary-btn" @click="login" :disabled="isLoading">
+                        <span v-if="isLoading">Chargement...</span>
+                        <span v-else>Se connecter</span>
+                    </button>
+                    <p class="error-message" v-if="errorMessage">\{{ errorMessage }}</p>
+                </div>
+                
+                <!-- Registration Form -->
+                <div v-if="authMode === 'register'" class="auth-form">
+                    <div class="form-group">
+                        <label for="register-username">Nom d'utilisateur</label>
+                        <input type="text" id="register-username" v-model="registerForm.username" placeholder="Choisir un nom d'utilisateur">
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" v-model="registerForm.email" placeholder="Votre email">
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Mot de passe</label>
+                        <input type="password" id="register-password" v-model="registerForm.password" placeholder="Choisir un mot de passe">
+                    </div>
+                    <div class="form-group">
+                        <label for="register-confirm">Confirmer le mot de passe</label>
+                        <input type="password" id="register-confirm" v-model="registerForm.confirmPassword" placeholder="Confirmer votre mot de passe">
+                    </div>
+                    <div class="form-group">
+                        <label>Genre</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" v-model="registerForm.gender" value="M">
+                                Homme
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" v-model="registerForm.gender" value="F">
+                                Femme
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group" v-if="registerForm.gender === 'F'">
+                        <label for="menstrual-date">Date des dernières règles</label>
+                        <input type="date" id="menstrual-date" v-model="registerForm.menstrualDate">
+                    </div>
+                    <button class="primary-btn" @click="register" :disabled="isLoading">
+                        <span v-if="isLoading">Chargement...</span>
+                        <span v-else>Créer un compte</span>
+                    </button>
+                    <p class="error-message" v-if="errorMessage">\{{ errorMessage }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Application -->
+        <div id="main-app" v-if="user">
+            <!-- Navigation -->
+            <nav class="main-nav">
+                <div class="logo">MOODY</div>
+                <div class="nav-tabs">
+                    <button :class="['nav-tab', {active: currentPage === 'dashboard'}]" @click="currentPage = 'dashboard'">Tableau de bord</button>
+                    <button :class="['nav-tab', {active: currentPage === 'analysis'}]" @click="currentPage = 'analysis'">Analyse</button>
+                    <button :class="['nav-tab', {active: currentPage === 'suggestions'}]" @click="currentPage = 'suggestions'">Suggestions</button>
+                    <button :class="['nav-tab', {active: currentPage === 'profile'}]" @click="currentPage = 'profile'">Profil</button>
+                </div>
+                <button class="logout-btn" @click="logout">Déconnexion</button>
+            </nav>
+
+            <!-- Dashboard -->
+            <div v-if="currentPage === 'dashboard'" class="page-container dashboard">
+                <h1>Comment vous sentez-vous aujourd'hui?</h1>
+                <p class="current-date">{% raw %}{{ getCurrentDate() }}{% endraw %}</p>
+                
+                <div class="questions-container">
+                    <!-- Question 1 -->
+                    <div class="question-box">
+                        <h3>1. Comment est votre niveau d'énergie aujourd'hui?</h3>
+                        <div class="options">
+                            <label class="option-label">
+                                <input type="radio" v-model="moodForm.question1" :value="1">
+                                Faible énergie
+                            </label>
+                            <label class="option-label">
+                                <input type="radio" v-model="moodForm.question1" :value="2">
+                                Énergie modérée
+                            </label>
+                            <label class="option-label">
+                                <input type="radio" v-model="moodForm.question1" :value="3">
+                                Énergie élevée
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Question 2 -->
+                    <div class="question-box">
+                        <h3>2. Comment évalueriez-vous votre niveau de stress?</h3>
+                        <div class="options">
+                            <label class="option-label">
+                                <input type="radio" v-model="moodForm.question2" :value="1">
+                                Stress faible
+                            </label>
+                            <label class="option-label">
+                                <input type="radio" v-model="moodForm.question2" :value="2">
+                                Stress modéré
+                            </label>
+                            <label class="option-label">
+                                <input type="radio" v-model="moodForm.question2" :value="3">
+                                Stress élevé
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Question 3 -->
+                    <div class="question-box">
+                        <h3>3. Êtes-vous satisfait(e) de votre journée?</h3>
+                        <div class="options">
+                            <label class="option-label">
+                                <input type="radio" v-model="moodForm.question3" :value="1">
+                                Pas satisfait(e)
+                            </label>
+                            <label class="option-label">
+                                <input type="radio" v-model="moodForm.question3" :value="2">
+                                Moyennement satisfait(e)
+                            </label>
+                            <label class="option-label">
+                                <input type="radio" v-model="moodForm.question3" :value="3">
+                                Très satisfait(e)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Emoji Selection -->
+                <div class="emoji-selection">
+                    <h2>Comment décririez-vous votre humeur globale?</h2>
+                    <div class="emoji-container">
+                        <button 
+                            v-for="(emoji, value) in emojis" 
+                            :key="value" 
+                            class="emoji-btn" 
+                            :class="{selected: moodForm.emoji === value}"
+                            @click="moodForm.emoji = value"
+                        >
+                            {{ emoji }}
+                        </button>
+                    </div>
+                    <div class="selected-emoji" v-if="moodForm.emoji">
+                        Sélectionné: {{ emojis[moodForm.emoji] }} {{ getEmojiLabel(moodForm.emoji) }}
+                    </div>
+                </div>
+                
+                <!-- Notes -->
+                <div class="notes-section">
+                    <h3>Notes supplémentaires:</h3>
+                    <textarea v-model="moodForm.notes" placeholder="Ajoutez des notes sur votre journée..."></textarea>
+                </div>
+                
+                <button class="save-btn" @click="saveMood" :disabled="isLoading">
+                    <span v-if="isLoading">Enregistrement...</span>
+                    <span v-else>Enregistrer</span>
+                </button>
+                <p class="error-message" v-if="errorMessage">{{ errorMessage }}</p>
+            </div>
+
+            <!-- Analysis -->
+            <div v-if="currentPage === 'analysis'" class="page-container analysis">
+                <h1>Analyse de l'humeur</h1>
+                
+                <div class="period-selection">
+                    <span>Sélectionner la période:</span>
+                    <div class="period-options">
+                        <label class="period-option">
+                            <input type="radio" v-model="analysisPeriod" value="7" @change="loadMoodHistory">
+                            7 jours
+                        </label>
+                        <label class="period-option">
+                            <input type="radio" v-model="analysisPeriod" value="30" @change="loadMoodHistory">
+                            30 jours
+                        </label>
+                        <label class="period-option">
+                            <input type="radio" v-model="analysisPeriod" value="90" @change="loadMoodHistory">
+                            90 jours
+                        </label>
+                        <label class="period-option">
+                            <input type="radio" v-model="analysisPeriod" value="0" @change="loadMoodHistory">
+                            Tous
+                        </label>
+                    </div>
+                </div>
+                
+                <div v-if="moodHistory.length === 0" class="no-data">
+                    <p>Pas de données disponibles pour la période sélectionnée.</p>
+                </div>
+                
+                <div v-else class="charts-container">
+                    <!-- Timeline Chart -->
+                    <div class="chart-box">
+                        <h2>Évolution de l'humeur</h2>
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                    
+                    <!-- Distribution Chart -->
+                    <div class="chart-grid">
+                        <div class="chart-box">
+                            <h2>Distribution des émotions</h2>
+                            <canvas id="distributionChart"></canvas>
+                        </div>
+                        
+                        <div class="chart-box">
+                            <h2>Moyennes des questions</h2>
+                            <canvas id="questionsChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Menstrual Cycle Correlation (for female users) -->
+                    <div v-if="user.gender === 'F' && user.last_menstrual_date" class="chart-box menstrual-section">
+                        <h2>Corrélation avec le cycle menstruel</h2>
+                        <canvas id="cycleChart"></canvas>
+                        
+                        <div class="update-menstrual">
+                            <label>Mettre à jour la date des dernières règles:</label>
+                            <div class="menstrual-update-form">
+                                <input type="date" v-model="newMenstrualDate">
+                                <button @click="updateMenstrualDate">Mettre à jour</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suggestions -->
+            <div v-if="currentPage === 'suggestions'" class="page-container suggestions">
+                <h1>Suggestions personnalisées</h1>
+                
+                <div v-if="!currentMood" class="no-data">
+                    <p>Pas de données d'humeur disponibles. Veuillez enregistrer votre humeur sur le tableau de bord.</p>
+                </div>
+                
+                <div v-else class="suggestions-content">
+                    <div class="current-mood">
+                        <h2>Basé sur votre humeur actuelle: {{ emojis[currentMood.emoji] }} {{ getEmojiLabel(currentMood.emoji) }}</h2>
+                    </div>
+                    
+                    <!-- Positive Mood Suggestions -->
+                    <div v-if="isPositiveMood(currentMood.emoji)" class="suggestion-cards">
+                        <!-- Inspirational Quote -->
+                        <div class="suggestion-card">
+                            <h3>Citation inspirante</h3>
+                            <p class="quote">{{ getRandomQuote('positive') }}</p>
+                        </div>
+                        
+                        <!-- Music Recommendations -->
+                        <div class="suggestion-card">
+                            <h3>Musique entraînante</h3>
+                            <ul class="link-list">
+                                <li v-for="(music, index) in positiveMusicSuggestions.slice(0, 3)" :key="index">
+                                    <a :href="music.url" target="_blank">{{ music.title }}</a>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Activities -->
+                        <div class="suggestion-card">
+                            <h3>Activités pour maintenir votre positivité</h3>
+                            <ul class="activity-list">
+                                <li v-for="(activity, index) in positiveActivities" :key="index">
+                                    {{ activity }}
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Videos -->
+                        <div class="suggestion-card">
+                            <h3>Vidéos énergisantes</h3>
+                            <ul class="link-list">
+                                <li v-for="(video, index) in positiveVideos" :key="index">
+                                    <a :href="video.url" target="_blank">{{ video.title }}</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Neutral Mood Suggestions -->
+                    <div v-if="isNeutralMood(currentMood.emoji)" class="suggestion-cards">
+                        <!-- Thought-provoking Quote -->
+                        <div class="suggestion-card">
+                            <h3>Citation inspirante</h3>
+                            <p class="quote">{{ getRandomQuote('neutral') }}</p>
+                        </div>
+                        
+                        <!-- Music Recommendations -->
+                        <div class="suggestion-card">
+                            <h3>Musique pour améliorer l'humeur</h3>
+                            <ul class="link-list">
+                                <li v-for="(music, index) in neutralMusicSuggestions.slice(0, 3)" :key="index">
+                                    <a :href="music.url" target="_blank">{{ music.title }}</a>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Activities -->
+                        <div class="suggestion-card">
+                            <h3>Activités pour améliorer votre humeur</h3>
+                            <ul class="activity-list">
+                                <li v-for="(activity, index) in neutralActivities" :key="index">
+                                    {{ activity }}
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Videos -->
+                        <div class="suggestion-card">
+                            <h3>Vidéos relaxantes et inspirantes</h3>
+                            <ul class="link-list">
+                                <li v-for="(video, index) in neutralVideos" :key="index">
+                                    <a :href="video.url" target="_blank">{{ video.title }}</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Negative Mood Suggestions -->
+                    <div v-if="isNegativeMood(currentMood.emoji)" class="suggestion-cards">
+                        <!-- Comforting Quote -->
+                        <div class="suggestion-card">
+                            <h3>Citation réconfortante</h3>
+                            <p class="quote">{{ getRandomQuote('negative') }}</p>
+                        </div>
+                        
+                        <!-- Music Recommendations -->
+                        <div class="suggestion-card">
+                            <h3>Musique apaisante</h3>
+                            <ul class="link-list">
+                                <li v-for="(music, index) in negativeMusicSuggestions.slice(0, 3)" :key="index">
+                                    <a :href="music.url" target="_blank">{{ music.title }}</a>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Activities -->
+                        <div class="suggestion-card">
+                            <h3>Activités d'auto-soin</h3>
+                            <ul class="activity-list">
+                                <li v-for="(activity, index) in negativeActivities" :key="index">
+                                    {{ activity }}
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Videos -->
+                        <div class="suggestion-card">
+                            <h3>Vidéos de relaxation</h3>
+                            <ul class="link-list">
+                                <li v-for="(video, index) in negativeVideos" :key="index">
+                                    <a :href="video.url" target="_blank">{{ video.title }}</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile -->
+            <div v-if="currentPage === 'profile'" class="page-container profile">
+                <h1>Mon Profil</h1>
+                
+                <div class="profile-sections">
+                    <!-- Basic Info (Read-only) -->
+                    <div class="profile-section">
+                        <h2>Informations de base</h2>
+                        <div class="info-row">
+                            <span class="info-label">Nom d'utilisateur:</span>
+                            <span class="info-value">{{ user.username }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Genre:</span>
+                            <span class="info-value">{{ 'Femme' if user.gender == 'F' else 'Homme' }}</span>
+                        </div>
+                        <div class="info-row" v-if="user.gender === 'F'">
+                            <span class="info-label">Dernières règles:</span>
+                            <span class="info-value">\{{ formatDate(user.last_menstrual_date) }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Editable Profile Information -->
+                    <div class="profile-section">
+                        <h2>Détails du profil</h2>
+                        <div class="profile-form">
+                            <div class="form-group">
+                                <label for="full-name">Nom complet</label>
+                                <input type="text" id="full-name" v-model="profileForm.full_name">
+                            </div>
+                            <div class="form-group">
+                                <label for="age">Âge</label>
+                                <input type="number" id="age" v-model="profileForm.age">
+                            </div>
+                            <div class="form-group">
+                                <label for="occupation">Occupation</label>
+                                <input type="text" id="occupation" v-model="profileForm.occupation">
+                            </div>
+                            <div class="form-group">
+                                <label for="interests">Intérêts</label>
+                                <input type="text" id="interests" v-model="profileForm.interests">
+                            </div>
+                            <div class="form-group">
+                                <label for="goals">Objectifs</label>
+                                <input type="text" id="goals" v-model="profileForm.goals">
+                            </div>
+                            <div class="form-group">
+                                <label for="notes">Notes supplémentaires</label>
+                                <textarea id="notes" v-model="profileForm.additional_notes"></textarea>
+                            </div>
+                            <button class="update-btn" @click="updateProfile" :disabled="isLoading">
+                                <span v-if="isLoading">Mise à jour...</span>
+                                <span v-else>Mettre à jour le profil</span>
+                            </button>
+                            <p class="error-message" v-if="errorMessage">{{ errorMessage }}</p>
+                            <p class="success-message" v-if="successMessage">{{ successMessage }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('serve_static', path='js/app.js') }}"></script>
+</body>
+</html>

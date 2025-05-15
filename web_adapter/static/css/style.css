@@ -1,0 +1,497 @@
+:root {
+    --male-color: #ADD8E6;
+    --female-color: #FFB6C1;
+    --primary-color: #4CAF50;
+    --background-color: #f0f0f0;
+    --text-color: #333;
+    --card-bg: #ffffff;
+    --border-color: #ddd;
+    --error-color: #e74c3c;
+    --success-color: #2ecc71;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+#app {
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Authentication Section */
+.auth-container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: var(--card-bg);
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.app-title {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+}
+
+.tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-btn.active {
+    border-bottom: 2px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+.auth-form {
+    text-align: left;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input[type="number"],
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.radio-group {
+    display: flex;
+    gap: 20px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.radio-label input {
+    margin-right: 5px;
+}
+
+.primary-btn,
+.save-btn,
+.update-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 20px;
+}
+
+.primary-btn:hover,
+.save-btn:hover,
+.update-btn:hover {
+    background-color: #3c9d40;
+}
+
+.primary-btn:disabled,
+.save-btn:disabled,
+.update-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.error-message {
+    color: var(--error-color);
+    margin-top: 10px;
+}
+
+.success-message {
+    color: var(--success-color);
+    margin-top: 10px;
+}
+
+/* Main Application */
+.main-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background-color: var(--card-bg);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.nav-tabs {
+    display: flex;
+}
+
+.nav-tab {
+    padding: 8px 15px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s;
+    margin: 0 5px;
+}
+
+.nav-tab.active {
+    border-bottom: 2px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+.logout-btn {
+    padding: 8px 15px;
+    background-color: transparent;
+    border: 1px solid var(--error-color);
+    color: var(--error-color);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.logout-btn:hover {
+    background-color: var(--error-color);
+    color: white;
+}
+
+.page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px;
+}
+
+/* Dashboard */
+.current-date {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.questions-container {
+    margin-bottom: 30px;
+}
+
+.question-box {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.option-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.emoji-selection {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.emoji-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.emoji-btn {
+    font-size: 2rem;
+    background: none;
+    border: 2px solid transparent;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: all 0.3s;
+}
+
+.emoji-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.emoji-btn.selected {
+    border-color: var(--primary-color);
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+.selected-emoji {
+    font-size: 1.2rem;
+    margin-top: 10px;
+}
+
+.notes-section {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.notes-section textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Analysis */
+.period-selection {
+    background-color: var(--card-bg);
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.period-options {
+    display: flex;
+    margin-left: 20px;
+    gap: 15px;
+}
+
+.period-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.charts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.chart-box {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
+}
+
+.menstrual-section {
+    border-top: 3px solid var(--female-color);
+}
+
+.update-menstrual {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+.menstrual-update-form {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.menstrual-update-form button {
+    padding: 10px 15px;
+    background-color: var(--female-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.no-data {
+    text-align: center;
+    padding: 50px;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Suggestions */
+.current-mood {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.suggestion-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.suggestion-card {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.quote {
+    font-style: italic;
+    padding: 15px;
+    border-left: 3px solid var(--primary-color);
+    margin: 15px 0;
+}
+
+.link-list, .activity-list {
+    list-style-type: none;
+    margin: 15px 0;
+}
+
+.link-list li, .activity-list li {
+    margin-bottom: 10px;
+}
+
+.link-list a {
+    color: #1e88e5;
+    text-decoration: none;
+}
+
+.link-list a:hover {
+    text-decoration: underline;
+}
+
+.activity-list li {
+    padding-left: 20px;
+    position: relative;
+}
+
+.activity-list li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: var(--primary-color);
+}
+
+/* Profile */
+.profile-sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
+}
+
+.profile-section {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.info-row {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.info-label {
+    font-weight: bold;
+    display: inline-block;
+    width: 150px;
+}
+
+.profile-form textarea {
+    min-height: 100px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .main-nav {
+        flex-direction: column;
+        padding: 15px;
+    }
+    
+    .logo {
+        margin-bottom: 15px;
+    }
+    
+    .nav-tabs {
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .period-selection {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .period-options {
+        margin-left: 0;
+        margin-top: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .chart-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .suggestion-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .profile-sections {
+        grid-template-columns: 1fr;
+    }
+    
+    .options, .emoji-container {
+        justify-content: space-between;
+    }
+}

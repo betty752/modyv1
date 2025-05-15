@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moody - Suivi de l'humeur</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        .tab.active {
+            border-bottom: 2px solid #4CAF50;
+            color: #4CAF50;
+        }
+        .auth-form {
+            padding: 20px 0;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MOODY</h1>
+        <p>Application de suivi d'humeur</p>
+        
+        <div class="tabs">
+            <div class="tab active" id="login-tab">Se connecter</div>
+            <div class="tab" id="register-tab">Créer un compte</div>
+        </div>
+        
+        <!-- Login Form -->
+        <div class="auth-form" id="login-form">
+            <div class="form-group">
+                <label for="username">Nom d'utilisateur</label>
+                <input type="text" id="username" placeholder="Votre nom d'utilisateur">
+            </div>
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" placeholder="Votre mot de passe">
+            </div>
+            <button class="button" id="login-button">Se connecter</button>
+            <div class="error" id="login-error"></div>
+        </div>
+        
+        <!-- Registration Form -->
+        <div class="auth-form" id="register-form" style="display: none;">
+            <div class="form-group">
+                <label for="reg-username">Nom d'utilisateur</label>
+                <input type="text" id="reg-username" placeholder="Choisir un nom d'utilisateur">
+            </div>
+            <div class="form-group">
+                <label for="reg-email">Email</label>
+                <input type="email" id="reg-email" placeholder="Votre email">
+            </div>
+            <div class="form-group">
+                <label for="reg-password">Mot de passe</label>
+                <input type="password" id="reg-password" placeholder="Choisir un mot de passe">
+            </div>
+            <div class="form-group">
+                <label for="reg-confirm">Confirmer le mot de passe</label>
+                <input type="password" id="reg-confirm" placeholder="Confirmer votre mot de passe">
+            </div>
+            <div class="form-group">
+                <label>Genre</label>
+                <div style="display: flex; gap: 20px;">
+                    <label style="display: inline-flex; align-items: center;">
+                        <input type="radio" name="gender" value="M" checked>
+                        <span style="margin-left: 5px;">Homme</span>
+                    </label>
+                    <label style="display: inline-flex; align-items: center;">
+                        <input type="radio" name="gender" value="F">
+                        <span style="margin-left: 5px;">Femme</span>
+                    </label>
+                </div>
+            </div>
+            <div class="form-group" id="menstrual-date-group" style="display: none;">
+                <label for="menstrual-date">Date des dernières règles</label>
+                <input type="date" id="menstrual-date">
+            </div>
+            <button class="button" id="register-button">Créer un compte</button>
+            <div class="error" id="register-error"></div>
+        </div>
+        
+        <p style="text-align: center; margin-top: 20px;">
+            Bienvenue dans l'application Moody pour le suivi de votre humeur quotidienne.
+        </p>
+    </div>
+    
+    <script>
+        // Basic tab switching
+        document.getElementById('login-tab').addEventListener('click', function() {
+            document.getElementById('login-tab').classList.add('active');
+            document.getElementById('register-tab').classList.remove('active');
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('register-form').style.display = 'none';
+        });
+        
+        document.getElementById('register-tab').addEventListener('click', function() {
+            document.getElementById('register-tab').classList.add('active');
+            document.getElementById('login-tab').classList.remove('active');
+            document.getElementById('register-form').style.display = 'block';
+            document.getElementById('login-form').style.display = 'none';
+        });
+        
+        // Toggle menstrual date field
+        const genderRadios = document.querySelectorAll('input[name="gender"]');
+        genderRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                const menstrualDateGroup = document.getElementById('menstrual-date-group');
+                if (this.value === 'F') {
+                    menstrualDateGroup.style.display = 'block';
+                } else {
+                    menstrualDateGroup.style.display = 'none';
+                }
+            });
+        });
+        
+        // Login form submission
+        document.getElementById('login-button').addEventListener('click', function() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                document.getElementById('login-error').textContent = 'Veuillez remplir tous les champs';
+                return;
+            }
+            
+            // Here we would normally send an AJAX request to the server
+            fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/dashboard';
+                } else {
+                    document.getElementById('login-error').textContent = data.message || 'Erreur de connexion';
+                }
+            })
+            .catch(error => {
+                document.getElementById('login-error').textContent = 'Erreur de connexion au serveur';
+                console.error('Error:', error);
+            });
+        });
+        
+        // Registration form submission
+        document.getElementById('register-button').addEventListener('click', function() {
+            const username = document.getElementById('reg-username').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirm').value;
+            const gender = document.querySelector('input[name="gender"]:checked').value;
+            const menstrualDate = gender === 'F' ? document.getElementById('menstrual-date').value : null;
+            
+            // Basic validation
+            if (!username || !email || !password || !confirmPassword) {
+                document.getElementById('register-error').textContent = 'Veuillez remplir tous les champs';
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                document.getElementById('register-error').textContent = 'Les mots de passe ne correspondent pas';
+                return;
+            }
+            
+            if (password.length < 6) {
+                document.getElementById('register-error').textContent = 'Le mot de passe doit comporter au moins 6 caractères';
+                return;
+            }
+            
+            if (gender === 'F' && !menstrualDate) {
+                document.getElementById('register-error').textContent = 'Veuillez entrer la date de vos dernières règles';
+                return;
+            }
+            
+            // Here we would normally send an AJAX request to the server
+            fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    username, 
+                    email, 
+                    password, 
+                    gender, 
+                    menstrual_date: menstrualDate 
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/dashboard';
+                } else {
+                    document.getElementById('register-error').textContent = data.message || 'Erreur d\'inscription';
+                }
+            })
+            .catch(error => {
+                document.getElementById('register-error').textContent = 'Erreur de connexion au serveur';
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
