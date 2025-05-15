@@ -1,82 +1,127 @@
-import tkinter as tk
+"""
+Application Moody - Module Web
+
+Ce module implémente l'interface web de l'application Moody en utilisant Flask.
+Il sert d'adaptateur entre la logique métier et l'interface utilisateur web.
+
+L'application permet aux utilisateurs de:
+- Créer un compte et se connecter
+- Enregistrer leur humeur quotidienne
+- Visualiser des analyses de leur humeur
+- Recevoir des suggestions personnalisées
+- Gérer leur profil
+"""
+
 import sys
 import os
-import threading
-import time
 import json
-from flask import Flask, render_template, request, jsonify, send_from_directory, redirect, url_for, session, flash
-import base64
-from io import BytesIO
-from PIL import Image, ImageTk
 import datetime
 import secrets
+from flask import Flask, render_template, request, jsonify, send_from_directory, redirect, url_for, session, flash
+from io import BytesIO
+from PIL import Image
 
-# Add parent directory to path
+# Ajouter le répertoire parent au chemin pour permettre les imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Import the Moody app modules
+# Importer les modules de l'application Moody
 from database import Database
-from main import MoodyApp
 
+# Initialisation de l'application Flask
 app = Flask(__name__)
-app.secret_key = secrets.token_hex(16)
+app.secret_key = secrets.token_hex(16)  # Génère une clé secrète aléatoire pour les sessions
 
-# Global variables to store the application state
-user_data = None
-current_mood = None
-mood_history = []
-app_messages = []
+# Variables globales pour stocker l'état de l'application
+user_data = None      # Données de l'utilisateur connecté
+current_mood = None   # Humeur actuelle
+mood_history = []     # Historique des humeurs
+app_messages = []     # Messages système
 
-# Initialize database
+# Initialisation de la base de données
 db = Database()
 
 @app.route('/')
 def index():
-    # Use the simplified template instead
+    """
+    Page d'accueil / connexion de l'application.
+    Utilise un template simplifié pour éviter les conflits entre Vue.js et Jinja2.
+    """
+    # Utiliser le template simplifié
     return render_template('simple_index.html')
 
 @app.route('/dashboard')
 def dashboard():
-    # Check if user is logged in
+    """
+    Tableau de bord pour l'enregistrement des humeurs.
+    Accessible uniquement aux utilisateurs authentifiés.
+    Permet de répondre aux questions d'évaluation et de sélectionner une humeur.
+    """
+    # Vérifier si l'utilisateur est connecté
     if 'user_id' not in session:
-        # User is not logged in, redirect to login page
+        # L'utilisateur n'est pas connecté, rediriger vers la page de connexion
         return redirect(url_for('index'))
     
-    # User is logged in, render the dashboard
+    # L'utilisateur est connecté, afficher le tableau de bord
     return render_template('dashboard.html')
 
 @app.route('/suggestions')
 def suggestions():
-    # Check if user is logged in
+    """
+    Page de suggestions personnalisées basées sur l'humeur.
+    Accessible uniquement aux utilisateurs authentifiés.
+    Offre des recommandations adaptées à l'état émotionnel actuel de l'utilisateur.
+    """
+    # Vérifier si l'utilisateur est connecté
     if 'user_id' not in session:
-        # User is not logged in, redirect to login page
+        # L'utilisateur n'est pas connecté, rediriger vers la page de connexion
         return redirect(url_for('index'))
     
-    # User is logged in, render the suggestions page
+    # L'utilisateur est connecté, afficher la page de suggestions
     return render_template('suggestions.html')
 
 @app.route('/analysis')
 def analysis():
-    # Check if user is logged in
+    """
+    Page d'analyse des données d'humeur avec graphiques.
+    Accessible uniquement aux utilisateurs authentifiés.
+    Affiche des visualisations pour aider l'utilisateur à comprendre ses tendances d'humeur.
+    """
+    # Vérifier si l'utilisateur est connecté
     if 'user_id' not in session:
-        # User is not logged in, redirect to login page
+        # L'utilisateur n'est pas connecté, rediriger vers la page de connexion
         return redirect(url_for('index'))
     
-    # User is logged in, render the analysis page
+    # L'utilisateur est connecté, afficher la page d'analyse
     return render_template('analysis.html')
 
 @app.route('/profile')
 def profile():
-    # Check if user is logged in
+    """
+    Page de gestion du profil utilisateur.
+    Accessible uniquement aux utilisateurs authentifiés.
+    Permet de visualiser et modifier les informations personnelles.
+    Pour les utilisatrices, inclut la gestion des dates du cycle menstruel.
+    """
+    # Vérifier si l'utilisateur est connecté
     if 'user_id' not in session:
-        # User is not logged in, redirect to login page
+        # L'utilisateur n'est pas connecté, rediriger vers la page de connexion
         return redirect(url_for('index'))
     
-    # User is logged in, render the profile page
+    # L'utilisateur est connecté, afficher la page de profil
     return render_template('profile.html')
 
 @app.route('/static/<path:path>')
 def serve_static(path):
+    """
+    Route pour servir les fichiers statiques (CSS, JavaScript, images, etc.).
+    Permet de charger les ressources nécessaires au fonctionnement de l'interface utilisateur.
+    
+    Args:
+        path (str): Chemin du fichier statique demandé
+        
+    Returns:
+        Le fichier statique demandé depuis le répertoire 'static'
+    """
     return send_from_directory('static', path)
 
 @app.route('/api/register', methods=['POST'])
