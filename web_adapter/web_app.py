@@ -4,11 +4,12 @@ import os
 import threading
 import time
 import json
-from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask import Flask, render_template, request, jsonify, send_from_directory, redirect, url_for, session, flash
 import base64
 from io import BytesIO
 from PIL import Image, ImageTk
 import datetime
+import secrets
 
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -18,6 +19,7 @@ from database import Database
 from main import MoodyApp
 
 app = Flask(__name__)
+app.secret_key = secrets.token_hex(16)
 
 # Global variables to store the application state
 user_data = None
@@ -35,8 +37,12 @@ def index():
 
 @app.route('/dashboard')
 def dashboard():
-    # Check if user is logged in (implement session handling later)
-    # For now, just render the dashboard
+    # Check if user is logged in
+    if 'user_id' not in session:
+        # User is not logged in, redirect to login page
+        return redirect(url_for('index'))
+    
+    # User is logged in, render the dashboard
     return render_template('dashboard.html')
 
 @app.route('/static/<path:path>')
@@ -75,8 +81,15 @@ def login():
     user = db.authenticate_user(username, password)
     
     if user:
+        # Store user info in session
+        session['user_id'] = user['id']
+        session['username'] = user['username']
+        session['gender'] = user['gender']
+        
+        # Store in global variable for compatibility
         user_data = user
-        return jsonify({'success': True, 'user': user})
+        
+        return jsonify({'success': True, 'redirect': '/dashboard'})
     else:
         return jsonify({'success': False, 'message': 'Invalid username or password'})
 
