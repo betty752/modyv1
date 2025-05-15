@@ -466,11 +466,15 @@
             fetch('/api/logout', {
                 method: 'POST',
             })
-            .then(() => {
-                window.location.href = '/';
+            .then(response => response.json())
+            .then(data => {
+                // If there's a redirect URL, use it; otherwise, go to homepage
+                window.location.href = data.redirect || '/';
             })
             .catch(error => {
                 console.error('Error logging out:', error);
+                // If there's an error, redirect to homepage anyway
+                window.location.href = '/';
             });
         });
     </script>

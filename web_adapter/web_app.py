@@ -65,8 +65,16 @@ def register():
     if success:
         # Automatically log in after registration
         user = db.authenticate_user(username, password)
+        
+        # Store user info in session
+        session['user_id'] = user['id']
+        session['username'] = user['username']
+        session['gender'] = user['gender']
+        
+        # Store in global variable for compatibility
         user_data = user
-        return jsonify({'success': True, 'user': user})
+        
+        return jsonify({'success': True, 'redirect': '/dashboard'})
     else:
         return jsonify({'success': False, 'message': 'Username or email already exists'})
 
@@ -193,9 +201,15 @@ def get_mood_statistics():
 @app.route('/api/logout', methods=['POST'])
 def logout():
     global user_data, current_mood
+    
+    # Clear session data
+    session.clear()
+    
+    # Clear global variables for compatibility
     user_data = None
     current_mood = None
-    return jsonify({'success': True})
+    
+    return jsonify({'success': True, 'redirect': '/'})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

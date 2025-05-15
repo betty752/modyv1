@@ -182,7 +182,7 @@
                 return;
             }
             
-            // Here we would normally send an AJAX request to the server
+            // Send login request to the server
             fetch('/api/login', {
                 method: 'POST',
                 headers: {
@@ -193,7 +193,8 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    window.location.href = '/dashboard';
+                    // If there's a redirect URL, use it; otherwise, go to dashboard
+                    window.location.href = data.redirect || '/dashboard';
                 } else {
                     document.getElementById('login-error').textContent = data.message || 'Erreur de connexion';
                 }
@@ -234,7 +235,7 @@
                 return;
             }
             
-            // Here we would normally send an AJAX request to the server
+            // Send registration request to the server
             fetch('/api/register', {
                 method: 'POST',
                 headers: {
@@ -251,7 +252,8 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    window.location.href = '/dashboard';
+                    // If there's a redirect URL, use it; otherwise, go to dashboard
+                    window.location.href = data.redirect || '/dashboard';
                 } else {
                     document.getElementById('register-error').textContent = data.message || 'Erreur d\'inscription';
                 }
