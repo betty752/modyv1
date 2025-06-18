@@ -255,6 +255,21 @@
             <h1>Comment vous sentez-vous aujourd'hui?</h1>
             <p class="current-date" id="current-date"></p>
             
+            <div class="emoji-selection">
+                <h3>Comment décririez-vous votre humeur globale?</h3>
+                <div class="emoji-container">
+                    <button class="emoji-btn" data-value="excellent" data-mood="Excellent">😊</button>
+                    <button class="emoji-btn" data-value="happy" data-mood="Content">🙂</button>
+                    <button class="emoji-btn" data-value="neutral" data-mood="Neutre">😐</button>
+                    <button class="emoji-btn" data-value="meh" data-mood="Maussade">😕</button>
+                    <button class="emoji-btn" data-value="sad" data-mood="Triste">😢</button>
+                    <button class="emoji-btn" data-value="angry" data-mood="En colère">😠</button>
+                    <button class="emoji-btn" data-value="stressed" data-mood="Stressé">😫</button>
+                    <button class="emoji-btn" data-value="overwhelmed" data-mood="Dépassé">😨</button>
+                </div>
+                <p class="selected-emoji" id="selected-emoji"></p>
+            </div>
+
             <div class="questions-container">
                 <!-- Question 1 -->
                 <div class="question-box">
@@ -314,22 +329,6 @@
                 </div>
             </div>
             
-            <!-- Emoji Selection -->
-            <div class="emoji-selection">
-                <h2>Comment décririez-vous votre humeur globale?</h2>
-                <div class="emoji-container">
-                    <button class="emoji-btn" data-value="very_happy">😄</button>
-                    <button class="emoji-btn" data-value="happy">🙂</button>
-                    <button class="emoji-btn" data-value="neutral">😐</button>
-                    <button class="emoji-btn" data-value="sad">😔</button>
-                    <button class="emoji-btn" data-value="very_sad">😢</button>
-                    <button class="emoji-btn" data-value="angry">😡</button>
-                    <button class="emoji-btn" data-value="tired">😴</button>
-                    <button class="emoji-btn" data-value="anxious">😰</button>
-                </div>
-                <div class="selected-emoji" id="selected-emoji"></div>
-            </div>
-            
             <!-- Notes section -->
             <div class="notes-section">
                 <h3>Notes supplémentaires:</h3>
@@ -339,45 +338,33 @@
             <button class="save-btn" id="save-btn">Enregistrer</button>
             <div class="error-message" id="error-message"></div>
         </div>
+        
     </div>
-    
     <script>
         // Set current date
-        function getCurrentDate() {
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            return new Date().toLocaleDateString('fr-FR', options);
-        }
-        document.getElementById('current-date').textContent = getCurrentDate();
+        const currentDate = document.getElementById('current-date');
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        currentDate.textContent = now.toLocaleDateString('fr-FR', options);
+        
+        // Initialize variables for emoji selection
+        let selectedEmojiValue = '';
+        let selectedMood = '';
+        const selectedEmoji = document.getElementById('selected-emoji');
+        const emojiBtns = document.querySelectorAll('.emoji-btn');
         
         // Emoji selection
-        const emojiBtns = document.querySelectorAll('.emoji-btn');
-        const selectedEmoji = document.getElementById('selected-emoji');
-        let selectedEmojiValue = '';
-        
-        const emojiLabels = {
-            'very_happy': 'Très Heureux',
-            'happy': 'Heureux',
-            'neutral': 'Neutre',
-            'sad': 'Triste',
-            'very_sad': 'Très Triste',
-            'angry': 'En colère',
-            'tired': 'Fatigué',
-            'anxious': 'Anxieux'
-        };
-        
         emojiBtns.forEach(btn => {
             btn.addEventListener('click', function() {
-                // Remove selected class from all buttons
+                // Remove selection from all buttons
                 emojiBtns.forEach(b => b.classList.remove('selected'));
-                
-                // Add selected class to clicked button
+                // Add selection to clicked button
                 this.classList.add('selected');
-                
-                // Update selected emoji value
+                // Store emoji value and mood
                 selectedEmojiValue = this.dataset.value;
-                
-                // Update display text
-                selectedEmoji.textContent = `Sélectionné: ${this.textContent} ${emojiLabels[selectedEmojiValue]}`;
+                selectedMood = this.dataset.mood;
+                // Show selected emoji and mood
+                selectedEmoji.textContent = `Humeur sélectionnée : ${this.textContent} (${selectedMood})`;
             });
         });
         
@@ -389,26 +376,29 @@
             const notes = document.getElementById('notes').value;
             const errorMessage = document.getElementById('error-message');
             
-            // Validate inputs
-            if (!question1 || !question2 || !question3) {
-                errorMessage.textContent = 'Veuillez répondre à toutes les questions';
+            // Validate emoji selection first - c'est l'emoji qui définit l'humeur
+            if (!selectedEmojiValue || !selectedMood) {
+                errorMessage.textContent = 'Veuillez sélectionner une émotion en cliquant sur un emoji';
                 return;
             }
             
-            if (!selectedEmojiValue) {
-                errorMessage.textContent = 'Veuillez sélectionner une émotion';
+            // Then validate other inputs
+            if (!question1 || !question2 || !question3) {
+                errorMessage.textContent = 'Veuillez répondre à toutes les questions';
                 return;
             }
             
             // Clear error message
             errorMessage.textContent = '';
             
-            // Prepare data for submission
+            // Prepare data for submission - l'humeur est définie par l'emoji sélectionné
             const data = {
+                mood: selectedMood,           // Texte de l'humeur (ex: "Content", "Triste", etc.)
+                emoji: selectedEmojiValue,     // Valeur de l'emoji (ex: "happy", "sad", etc.)
+                emoji_character: document.querySelector('.emoji-btn.selected').textContent,  // L'emoji lui-même
                 question1: parseInt(question1.value),
                 question2: parseInt(question2.value),
                 question3: parseInt(question3.value),
-                emoji: selectedEmojiValue,
                 notes: notes
             };
             
@@ -423,9 +413,8 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Redirect to suggestions page and reset the error message
+                    // Redirect to suggestions page
                     window.location.href = '/suggestions';
-                    errorMessage.textContent = '';
                 } else {
                     errorMessage.textContent = data.message || "Échec de l'enregistrement de l'humeur";
                 }
@@ -469,12 +458,10 @@
             })
             .then(response => response.json())
             .then(data => {
-                // If there's a redirect URL, use it; otherwise, go to homepage
                 window.location.href = data.redirect || '/';
             })
             .catch(error => {
                 console.error('Error logging out:', error);
-                // If there's an error, redirect to homepage anyway
                 window.location.href = '/';
             });
         });

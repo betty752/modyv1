@@ -190,12 +190,23 @@ def save_mood():
     emoji = data.get('emoji', '')
     notes = data.get('notes', '')
     
-    success = db.save_mood_entry(user_data['id'], question1, question2, question3, emoji, notes)
+    # Obtenir l'horodatage précis
+    current_timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    
+    success = db.save_mood_entry(
+        user_data['id'],
+        question1, 
+        question2, 
+        question3, 
+        emoji, 
+        notes,
+        timestamp=current_timestamp
+    )
     
     if success:
-        # Update current mood
+        # Update current mood avec l'horodatage précis
         current_mood = {
-            'date': datetime.datetime.now().strftime('%Y-%m-%d'),
+            'date': current_timestamp,
             'question1': question1,
             'question2': question2,
             'question3': question3,

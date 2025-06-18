@@ -51,18 +51,17 @@ class Database:
             )
             ''')
             
-            # Mood entries table
+            # Mood entries table avec timestamp précis
             cursor.execute('''
             CREATE TABLE IF NOT EXISTS mood_entries (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,
-                date TEXT NOT NULL,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                 question1_answer INTEGER NOT NULL,
                 question2_answer INTEGER NOT NULL,
                 question3_answer INTEGER NOT NULL,
                 emoji_choice TEXT NOT NULL,
                 notes TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users (id)
             )
             ''')
@@ -177,7 +176,7 @@ class Database:
             return None
     
     def save_mood_entry(self, user_id: int, question1: int, question2: int, 
-                         question3: int, emoji: str, notes: str = '') -> bool:
+                         question3: int, emoji: str, notes: str = '', timestamp: str = None) -> bool:
         """
         Save a mood entry for a user.
         
@@ -197,13 +196,14 @@ class Database:
             conn = self.get_connection()
             cursor = conn.cursor()
             
-            current_date = datetime.datetime.now().strftime('%Y-%m-%d')
+            # Utiliser le timestamp fourni ou l'horodatage actuel
+            current_timestamp = timestamp or datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             
             cursor.execute('''
-            INSERT INTO mood_entries 
-            (user_id, date, question1_answer, question2_answer, question3_answer, emoji_choice, notes) 
+            INSERT INTO mood_entries (user_id, timestamp, question1_answer, question2_answer, 
+                                    question3_answer, emoji_choice, notes)
             VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (user_id, current_date, question1, question2, question3, emoji, notes))
+            ''', (user_id, current_timestamp, question1, question2, question3, emoji, notes))
             
             conn.commit()
             self.close(conn)
@@ -232,22 +232,23 @@ class Database:
             past_date = (datetime.datetime.now() - datetime.timedelta(days=days)).strftime('%Y-%m-%d')
             
             cursor.execute('''
-            SELECT id, date, question1_answer, question2_answer, question3_answer, emoji_choice, notes 
-            FROM mood_entries 
-            WHERE user_id = ? AND date >= ? 
-            ORDER BY date ASC
-            ''', (user_id, past_date))
+            SELECT id, timestamp, question1_answer, question2_answer, question3_answer,
+                   emoji_choice, notes
+            FROM mood_entries
+            WHERE user_id = ? AND timestamp >= datetime('now', ?)
+            ORDER BY timestamp DESC
+            ''', (user_id, f'-{days} days'))
             
             entries = cursor.fetchall()
             result = [
                 {
                     "id": entry[0],
-                    "date": entry[1],
-                    "question1": entry[2],
-                    "question2": entry[3],
-                    "question3": entry[4],
-                    "emoji": entry[5],
-                    "notes": entry[6]
+                    'date': entry[1],
+                    'question1': entry[2],
+                    'question2': entry[3],
+                    'question3': entry[4],
+                    'emoji': entry[5],
+                    'notes': entry[6]
                 }
                 for entry in entries
             ]

@@ -5,76 +5,173 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Moody - Suivi de l'humeur</title>
     <link rel="stylesheet" href="{{ url_for('serve_static', path='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <div id="app">
         <!-- Authentication Section -->
         <div id="auth-section" v-if="!user">
+            <div class="auth-background"></div>
             <div class="auth-container">
-                <h1 class="app-title">MOODY</h1>
+                <div class="logo-container">
+                    <img src="{{ url_for('serve_static', path='images/logo.jpg') }}" alt="Moody Logo" class="app-logo">
+                </div>
+                <h2 class="auth-subtitle">Application de suivi d'humeur quotidienne</h2>
+                
                 <div class="tabs">
-                    <button :class="['tab-btn', {active: authMode === 'login'}]" @click="authMode = 'login'">Se connecter</button>
-                    <button :class="['tab-btn', {active: authMode === 'register'}]" @click="authMode = 'register'">Créer un compte</button>
+                    <button :class="['tab-btn', {active: authMode === 'login'}]" @click="authMode = 'login'">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Se connecter
+                    </button>
+                    <button :class="['tab-btn', {active: authMode === 'register'}]" @click="authMode = 'register'">
+                        <i class="fas fa-user-plus"></i>
+                        Créer un compte
+                    </button>
                 </div>
                 
                 <!-- Login Form -->
                 <div v-if="authMode === 'login'" class="auth-form">
                     <div class="form-group">
-                        <label for="login-username">Nom d'utilisateur</label>
-                        <input type="text" id="login-username" v-model="loginForm.username" placeholder="Votre nom d'utilisateur">
+                        <label for="login-username">
+                            <i class="fas fa-user"></i>
+                            Nom d'utilisateur
+                        </label>
+                        <div class="input-group">
+                            <input type="text" 
+                                   id="login-username" 
+                                   v-model="loginForm.username" 
+                                   placeholder="Votre nom d'utilisateur"
+                                   autocomplete="username">
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="login-password">Mot de passe</label>
-                        <input type="password" id="login-password" v-model="loginForm.password" placeholder="Votre mot de passe">
+                        <label for="login-password">
+                            <i class="fas fa-lock"></i>
+                            Mot de passe
+                        </label>
+                        <div class="input-group">
+                            <input :type="showPassword ? 'text' : 'password'"
+                                   id="login-password" 
+                                   v-model="loginForm.password" 
+                                   placeholder="Votre mot de passe"
+                                   autocomplete="current-password">
+                            <button type="button" 
+                                    class="toggle-password"
+                                    @click="showPassword = !showPassword">
+                                <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                            </button>
+                        </div>
                     </div>
                     <button class="primary-btn" @click="login" :disabled="isLoading">
-                        <span v-if="isLoading">Chargement...</span>
-                        <span v-else>Se connecter</span>
+                        <i class="fas fa-spinner fa-spin" v-if="isLoading"></i>
+                        <span v-else>
+                            <i class="fas fa-sign-in-alt"></i>
+                            Se connecter
+                        </span>
                     </button>
-                    <p class="error-message" v-if="errorMessage">\{{ errorMessage }}</p>
                 </div>
                 
                 <!-- Registration Form -->
                 <div v-if="authMode === 'register'" class="auth-form">
                     <div class="form-group">
-                        <label for="register-username">Nom d'utilisateur</label>
-                        <input type="text" id="register-username" v-model="registerForm.username" placeholder="Choisir un nom d'utilisateur">
+                        <label for="register-username">
+                            <i class="fas fa-user"></i>
+                            Nom d'utilisateur
+                        </label>
+                        <div class="input-group">
+                            <input type="text" 
+                                   id="register-username" 
+                                   v-model="registerForm.username" 
+                                   placeholder="Choisir un nom d'utilisateur"
+                                   autocomplete="username">
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="register-email">Email</label>
-                        <input type="email" id="register-email" v-model="registerForm.email" placeholder="Votre email">
+                        <label for="register-email">
+                            <i class="fas fa-envelope"></i>
+                            Email
+                        </label>
+                        <div class="input-group">
+                            <input type="email" 
+                                   id="register-email" 
+                                   v-model="registerForm.email" 
+                                   placeholder="Votre email"
+                                   autocomplete="email">
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="register-password">Mot de passe</label>
-                        <input type="password" id="register-password" v-model="registerForm.password" placeholder="Choisir un mot de passe">
+                        <label for="register-password">
+                            <i class="fas fa-lock"></i>
+                            Mot de passe
+                        </label>
+                        <div class="input-group">
+                            <input :type="showPassword ? 'text' : 'password'"
+                                   id="register-password" 
+                                   v-model="registerForm.password" 
+                                   placeholder="Choisir un mot de passe"
+                                   autocomplete="new-password">
+                            <button type="button" 
+                                    class="toggle-password"
+                                    @click="showPassword = !showPassword">
+                                <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="register-confirm">Confirmer le mot de passe</label>
-                        <input type="password" id="register-confirm" v-model="registerForm.confirmPassword" placeholder="Confirmer votre mot de passe">
+                        <label for="register-confirm">
+                            <i class="fas fa-lock"></i>
+                            Confirmer le mot de passe
+                        </label>
+                        <div class="input-group">
+                            <input :type="showPassword ? 'text' : 'password'"
+                                   id="register-confirm" 
+                                   v-model="registerForm.confirmPassword" 
+                                   placeholder="Confirmer votre mot de passe"
+                                   autocomplete="new-password">
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label>Genre</label>
+                        <label>
+                            <i class="fas fa-venus-mars"></i>
+                            Genre
+                        </label>
                         <div class="radio-group">
                             <label class="radio-label">
                                 <input type="radio" v-model="registerForm.gender" value="M">
+                                <i class="fas fa-mars"></i>
                                 Homme
                             </label>
                             <label class="radio-label">
                                 <input type="radio" v-model="registerForm.gender" value="F">
+                                <i class="fas fa-venus"></i>
                                 Femme
                             </label>
                         </div>
                     </div>
                     <div class="form-group" v-if="registerForm.gender === 'F'">
-                        <label for="menstrual-date">Date des dernières règles</label>
-                        <input type="date" id="menstrual-date" v-model="registerForm.menstrualDate">
+                        <label for="menstrual-date">
+                            <i class="fas fa-calendar-alt"></i>
+                            Date des dernières règles
+                        </label>
+                        <div class="input-group">
+                            <input type="date" 
+                                   id="menstrual-date" 
+                                   v-model="registerForm.menstrualDate">
+                        </div>
                     </div>
                     <button class="primary-btn" @click="register" :disabled="isLoading">
-                        <span v-if="isLoading">Chargement...</span>
-                        <span v-else>Créer un compte</span>
+                        <i class="fas fa-spinner fa-spin" v-if="isLoading"></i>
+                        <span v-else>
+                            <i class="fas fa-user-plus"></i>
+                            Créer un compte
+                        </span>
                     </button>
-                    <p class="error-message" v-if="errorMessage">\{{ errorMessage }}</p>
+                </div>
+                
+                <div v-if="errorMessage" class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    \{{ errorMessage }}
                 </div>
             </div>
         </div>
