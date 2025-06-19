@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -89,6 +90,43 @@
             text-align: center;
         }
         
+        .controls-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .date-range-filter {
+            display: flex;
+            align-items: center;
+        }
+        
+        .date-range-filter select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+        
+        .pdf-export-btn {
+            padding: 10px 20px;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .pdf-export-btn:hover {
+            background-color: #ff5252;
+        }
+        
         .charts-container {
             display: grid;
             grid-template-columns: 1fr;
@@ -109,6 +147,10 @@
             box-shadow: 0 2px 3px rgba(0,0,0,0.05);
         }
         
+        .chart-card.full-width {
+            grid-column: 1 / -1;
+        }
+        
         .chart-title {
             margin-top: 0;
             margin-bottom: 20px;
@@ -125,10 +167,6 @@
             background: white;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        #mood-timeline-chart {
-            margin-bottom: 20px;
         }
 
         .chart-legend {
@@ -165,23 +203,10 @@
             font-style: italic;
         }
         
-        .date-range-filter {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-        
-        .date-range-filter select {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin: 0 10px;
-        }
-        
         .menstrual-cycle-section {
             margin-top: 30px;
             padding: 20px;
-            background-color: #fff0f5; /* Light pink background for female users */
+            background-color: #fff0f5;
             border-radius: 8px;
             border-left: 4px solid #FF69B4;
         }
@@ -258,9 +283,16 @@
             from { opacity: 1; }
             to { opacity: 0; }
         }
+
+        .loading-message {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
     </style>
-    <!-- Inclusion de Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -272,51 +304,32 @@
                 <button class="nav-link" onclick="window.location.href='/suggestions'">Suggestions</button>
                 <button class="nav-link" onclick="window.location.href='/profile'">Profil</button>
             </div>
-            <button class="logout-btn">Déconnexion</button>
+            <button class="logout-btn" onclick="logout()">Déconnexion</button>
         </div>
         
         <div class="main-content">
             <h1>Analyse de votre humeur</h1>
             
-            <div class="date-range-filter">
-                <label for="date-range">Période d'analyse:</label>
-                <select id="date-range" onchange="updateCharts()">
-                    <option value="7">7 derniers jours</option>
-                    <option value="30" selected>30 derniers jours</option>
-                    <option value="90">3 derniers mois</option>
-                    <option value="180">6 derniers mois</option>
-                </select>
+            <div class="controls-section">
+                <div class="date-range-filter">
+                    <label for="date-range">Période d'analyse:</label>
+                    <select id="date-range" onchange="updateCharts()">
+                        <option value="7">7 derniers jours</option>
+                        <option value="30" selected>30 derniers jours</option>
+                        <option value="90">3 derniers mois</option>
+                        <option value="180">6 derniers mois</option>
+                    </select>
+                </div>
+                <button class="pdf-export-btn" onclick="exportToPDF()">Télécharger PDF</button>
             </div>
             
-            <div class="charts-container">
+            <div class="charts-container" id="charts-container">
                 <!-- Graphique d'humeur dans le temps -->
-                <div class="chart-card">
+                <div class="chart-card full-width">
                     <h3 class="chart-title">Évolution de votre humeur</h3>
                     <div class="chart-container">
                         <canvas id="mood-timeline-chart"></canvas>
                         <div id="loading-timeline" class="loading-message">Chargement du graphique...</div>
-                        <div class="chart-legend">
-                            <div class="legend-item">
-                                <span class="legend-color" style="background: #4CAF50"></span>
-                                Excellent
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-color" style="background: #8BC34A"></span>
-                                Bon
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-color" style="background: #FFC107"></span>
-                                Neutre
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-color" style="background: #FF9800"></span>
-                                Bas
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-color" style="background: #F44336"></span>
-                                Très Bas
-                            </div>
-                        </div>
                     </div>
                 </div>
                 
@@ -325,22 +338,24 @@
                     <h3 class="chart-title">Distribution des émojis</h3>
                     <div class="chart-container">
                         <canvas id="emoji-distribution-chart"></canvas>
+                        <div id="loading-distribution" class="loading-message">Chargement...</div>
                     </div>
                 </div>
                 
                 <!-- Graphique des réponses aux questions -->
                 <div class="chart-card">
-                    <h3 class="chart-title">Moyennes des réponses aux questions</h3>
+                    <h3 class="chart-title">Moyennes des réponses</h3>
                     <div class="chart-container">
                         <canvas id="questions-avg-chart"></canvas>
+                        <div id="loading-questions" class="loading-message">Chargement...</div>
                     </div>
                 </div>
                 
                 <!-- Statistiques générales -->
-                <div class="chart-card">
+                <div class="chart-card full-width">
                     <h3 class="chart-title">Statistiques générales</h3>
                     <div class="chart-container" id="general-stats">
-                        <div id="loading-stats">Chargement des statistiques...</div>
+                        <div id="loading-stats" class="loading-message">Chargement des statistiques...</div>
                     </div>
                 </div>
             </div>
@@ -366,28 +381,27 @@
     </div>
     
     <script>
-        // Variables globales pour stocker les données
+        // Variables globales
         let moodEntries = [];
         let userGender = '';
         let lastMenstrualDate = '';
-        let charts = {}; // Pour stocker les instances de graphiques
+        let charts = {};
         
-        // Récupérer les données de l'humeur
+        // Fonction pour récupérer les données
         async function fetchMoodData() {
             try {
-                // Récupérer le nombre de jours sélectionné
                 const days = document.getElementById('date-range').value;
-                
-                // Récupérer les données d'humeur
                 const response = await fetch(`/api/mood_history?days=${days}`);
                 const data = await response.json();
+                
+                // Masquer les messages de chargement
+                document.querySelectorAll('.loading-message').forEach(el => el.style.display = 'none');
                 
                 if (data.success) {
                     moodEntries = data.entries || [];
                     userGender = data.user_gender || '';
                     lastMenstrualDate = data.last_menstrual_date || '';
                     
-                    // Afficher ou masquer la section du cycle menstruel en fonction du genre
                     document.getElementById('menstrual-section').style.display = 
                         userGender === 'F' ? 'block' : 'none';
                     
@@ -395,10 +409,7 @@
                         document.getElementById('last-period-date').value = lastMenstrualDate;
                     }
                     
-                    // Générer les graphiques
                     renderCharts();
-                    
-                    // Générer les statistiques générales
                     renderGeneralStats();
                 } else {
                     showNoDataMessage();
@@ -409,7 +420,6 @@
             }
         }
         
-        // Afficher un message si aucune donnée n'est disponible
         function showNoDataMessage() {
             const containers = document.querySelectorAll('.chart-container');
             containers.forEach(container => {
@@ -417,33 +427,32 @@
             });
         }
         
-        // Générer les graphiques
         function renderCharts() {
             if (moodEntries.length === 0) {
                 showNoDataMessage();
                 return;
             }
             
-            // Détruire les graphiques existants s'ils existent
+            // Détruire les graphiques existants
             Object.values(charts).forEach(chart => {
-                if (chart) chart.destroy();
+                if (chart && typeof chart.destroy === 'function') {
+                    chart.destroy();
+                }
             });
+            charts = {};
             
-            // Créer les nouveaux graphiques
             renderTimelineChart();
             renderDistributionChart();
             renderQuestionsChart();
             
-            // Créer le graphique de corrélation du cycle si applicable
             if (userGender === 'F' && lastMenstrualDate) {
                 renderCycleCorrelationChart();
             }
         }
-                // Graphique d'évolution de l'humeur
+        
         function renderTimelineChart() {
             const ctx = document.getElementById('mood-timeline-chart').getContext('2d');
             
-            // Mapper les emojis à des valeurs numériques pour le graphique
             const emojiValues = {
                 'very_happy': 5,
                 'happy': 4,
@@ -455,50 +464,19 @@
                 'anxious': 2
             };
             
-            // Préparer les données
             const sortedEntries = [...moodEntries].sort((a, b) => new Date(a.date) - new Date(b.date));
             
-            // Grouper les entrées par jour
-            const entriesByDay = {};
-            sortedEntries.forEach(entry => {
-                // S'assurer que la date est correctement interprétée avec le fuseau horaire local
+            const labels = sortedEntries.map(entry => {
                 const date = new Date(entry.date);
-                // Formater la date de manière plus compacte
                 const day = date.getDate().toString().padStart(2, '0');
                 const month = (date.getMonth() + 1).toString().padStart(2, '0');
-                const dayKey = `${day}/${month}`;
-                if (!entriesByDay[dayKey]) {
-                    entriesByDay[dayKey] = [];
-                }
-                
-                // Formater l'heure correctement en tenant compte du fuseau horaire
                 const hours = date.getHours().toString().padStart(2, '0');
                 const minutes = date.getMinutes().toString().padStart(2, '0');
-                const timeStr = `${hours}:${minutes}`;
-                
-                entriesByDay[dayKey].push({
-                    ...entry,
-                    time: timeStr,
-                    value: emojiValues[entry.emoji] || 3,
-                    timestamp: date.getTime() // Ajouter le timestamp pour le tri
-                });
+                return `${day}/${month} ${hours}:${minutes}`;
             });
             
-            // Créer les points de données pour le graphique
-            const dataPoints = [];
-            const labels = [];
+            const dataPoints = sortedEntries.map(entry => emojiValues[entry.emoji] || 3);
             
-            // Trier toutes les entrées par timestamp pour assurer l'ordre chronologique
-            Object.entries(entriesByDay).forEach(([day, entries]) => {
-                // Trier les entrées du jour par heure
-                entries.sort((a, b) => a.timestamp - b.timestamp);
-                entries.forEach(entry => {
-                    labels.push(`${day} ${entry.time}`);
-                    dataPoints.push(entry.value);
-                });
-            });
-            
-            // Créer le graphique
             charts.timeline = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -539,48 +517,13 @@
                             }
                         },
                         x: {
-                            grid: {
-                                color: 'rgba(0,0,0,0.05)'
-                            },
                             ticks: {
                                 maxRotation: 45,
-                                minRotation: 45,
-                                font: {
-                                    size: 11
-                                },
-                                callback: function(value, index, values) {
-                                    const label = this.getLabelForValue(value);
-                                    const parts = label.split(' ');
-                                    const date = parts[0];
-                                    const time = parts[1];
-                                    // Afficher l'heure en dessous de la date
-                                    return [`${date}`, `${time}`];
-                                },
-                                autoSkip: false,
-                                maxTicksLimit: 20
+                                minRotation: 45
                             }
                         }
                     },
                     plugins: {
-                        tooltip: {
-                            callbacks: {
-                                title: function(context) {
-                                    return context[0].label;
-                                },
-                                label: function(context) {
-                                    const emojiLabels = {
-                                        5: 'Très heureux(se)',
-                                        4: 'Heureux(se)',
-                                        3: 'Neutre',
-                                        2.5: 'Fatigué(e)',
-                                        2: 'Triste/En colère/Anxieux(se)',
-                                        1: 'Très triste'
-                                    };
-                                    const value = context.parsed.y;
-                                    return `Humeur: ${emojiLabels[value] || `Valeur: ${value}`}`;
-                                }
-                            }
-                        },
                         legend: {
                             display: false
                         }
@@ -589,34 +532,28 @@
             });
         }
         
-        // Graphique de distribution des émojis
         function renderDistributionChart() {
             const ctx = document.getElementById('emoji-distribution-chart').getContext('2d');
             
-            // Compter les occurrences de chaque emoji
             const emojiCounts = {};
             moodEntries.forEach(entry => {
                 emojiCounts[entry.emoji] = (emojiCounts[entry.emoji] || 0) + 1;
             });
             
-            // Préparer les données
-            const labels = Object.keys(emojiCounts).map(emoji => {
-                const emojiLabels = {
-                    'very_happy': 'Très heureux(se)',
-                    'happy': 'Heureux(se)',
-                    'neutral': 'Neutre',
-                    'sad': 'Triste',
-                    'very_sad': 'Très triste',
-                    'angry': 'En colère',
-                    'tired': 'Fatigué(e)',
-                    'anxious': 'Anxieux(se)'
-                };
-                return emojiLabels[emoji] || emoji;
-            });
+            const emojiLabels = {
+                'very_happy': 'Très heureux(se)',
+                'happy': 'Heureux(se)',
+                'neutral': 'Neutre',
+                'sad': 'Triste',
+                'very_sad': 'Très triste',
+                'angry': 'En colère',
+                'tired': 'Fatigué(e)',
+                'anxious': 'Anxieux(se)'
+            };
             
+            const labels = Object.keys(emojiCounts).map(emoji => emojiLabels[emoji] || emoji);
             const data = Object.values(emojiCounts);
             
-            // Définir des couleurs pour chaque type d'humeur
             const backgroundColors = Object.keys(emojiCounts).map(emoji => {
                 const colorMap = {
                     'very_happy': 'rgba(76, 175, 80, 0.8)',
@@ -631,7 +568,6 @@
                 return colorMap[emoji] || 'rgba(33, 150, 243, 0.8)';
             });
             
-            // Créer le graphique
             charts.distribution = new Chart(ctx, {
                 type: 'pie',
                 data: {
@@ -648,28 +584,16 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'right'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.parsed || 0;
-                                    const percentage = Math.round((value / moodEntries.length) * 100);
-                                    return `${label}: ${value} (${percentage}%)`;
-                                }
-                            }
+                            position: 'bottom'
                         }
                     }
                 }
             });
         }
         
-        // Graphique des moyennes des réponses aux questions
         function renderQuestionsChart() {
             const ctx = document.getElementById('questions-avg-chart').getContext('2d');
             
-            // Calculer les moyennes pour chaque question
             let q1Total = 0, q2Total = 0, q3Total = 0;
             moodEntries.forEach(entry => {
                 q1Total += entry.question1 || 0;
@@ -677,18 +601,18 @@
                 q3Total += entry.question3 || 0;
             });
             
-            const q1Avg = moodEntries.length > 0 ? q1Total / moodEntries.length : 0;
-            const q2Avg = moodEntries.length > 0 ? q2Total / moodEntries.length : 0;
-            const q3Avg = moodEntries.length > 0 ? q3Total / moodEntries.length : 0;
+            const count = moodEntries.length;
+            const q1Avg = count > 0 ? q1Total / count : 0;
+            const q2Avg = count > 0 ? q2Total / count : 0;
+            const q3Avg = count > 0 ? q3Total / count : 0;
             
-            // Créer le graphique
             charts.questions = new Chart(ctx, {
                 type: 'radar',
                 data: {
                     labels: [
                         'Niveau d\'énergie',
                         'Niveau de stress',
-                        'Satisfaction de la journée'
+                        'Satisfaction'
                     ],
                     datasets: [{
                         label: 'Moyennes',
@@ -696,10 +620,7 @@
                         backgroundColor: 'rgba(76, 175, 80, 0.2)',
                         borderColor: '#4CAF50',
                         borderWidth: 2,
-                        pointBackgroundColor: '#4CAF50',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: '#4CAF50'
+                        pointBackgroundColor: '#4CAF50'
                     }]
                 },
                 options: {
@@ -707,9 +628,6 @@
                     maintainAspectRatio: false,
                     scales: {
                         r: {
-                            angleLines: {
-                                display: true
-                            },
                             suggestedMin: 0,
                             suggestedMax: 3
                         }
@@ -718,39 +636,43 @@
             });
         }
         
-        // Graphique de corrélation du cycle menstruel
         function renderCycleCorrelationChart() {
             if (!lastMenstrualDate || userGender !== 'F') return;
             
             const ctx = document.getElementById('cycle-correlation-chart').getContext('2d');
             
-            // Calculer les jours depuis les dernières règles pour chaque entrée
+            const emojiValues = {
+                'very_happy': 5,
+                'happy': 4,
+                'neutral': 3,
+                'sad': 2,
+                'very_sad': 1,
+                'angry': 2,
+                'tired': 2.5,
+                'anxious': 2
+            };
+            
             const cycleData = moodEntries.map(entry => {
                 const entryDate = new Date(entry.date);
                 const menstrualDate = new Date(lastMenstrualDate);
                 const daysDiff = Math.floor((entryDate - menstrualDate) / (24 * 60 * 60 * 1000));
                 return {
-                    day: daysDiff >= 0 ? daysDiff % 28 : 28 + daysDiff % 28, // jour du cycle (0-27)
-                    mood: entry.emoji,
-                    moodValue: getMoodValue(entry.emoji)
+                    day: daysDiff >= 0 ? daysDiff % 28 : 28 + daysDiff % 28,
+                    moodValue: emojiValues[entry.emoji] || 3
                 };
             });
             
-            // Grouper par jour du cycle et calculer l'humeur moyenne
-            const cycleDays = Array(28).fill().map((_, i) => i);
+            const cycleDays = Array(28).fill().map((_, i) => i + 1);
             const moodByDay = cycleDays.map(day => {
-                const dayEntries = cycleData.filter(entry => entry.day === day);
+                const dayEntries = cycleData.filter(entry => entry.day === day - 1);
                 if (dayEntries.length === 0) return null;
-                
-                const avgMood = dayEntries.reduce((sum, entry) => sum + entry.moodValue, 0) / dayEntries.length;
-                return avgMood;
+                return dayEntries.reduce((sum, entry) => sum + entry.moodValue, 0) / dayEntries.length;
             });
             
-            // Créer le graphique
             charts.cycle = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: cycleDays.map(day => `Jour ${day+1}`),
+                    labels: cycleDays.map(day => `Jour ${day}`),
                     datasets: [{
                         label: 'Humeur moyenne',
                         data: moodByDay,
@@ -765,9 +687,8 @@
                     maintainAspectRatio: false,
                     scales: {
                         y: {
-                            beginAtZero: false,
-                            min: 0.5,
-                            max: 5.5,
+                            min: 1,
+                            max: 5,
                             ticks: {
                                 callback: function(value) {
                                     const labels = {
@@ -781,39 +702,11 @@
                                 }
                             }
                         }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                title: function(context) {
-                                    const day = parseInt(context[0].label.replace('Jour ', ''));
-                                    let phase = '';
-                                    let phaseInfo = '';
-                                    if (day <= 5) {
-                                        phase = 'Phase menstruelle';
-                                        phaseInfo = '(Règles - Niveau d\'énergie potentiellement bas)';
-                                    } else if (day <= 13) {
-                                        phase = 'Phase folliculaire';
-                                        phaseInfo = '(Augmentation progressive de l\'énergie)';
-                                    } else if (day <= 16) {
-                                        phase = 'Ovulation';
-                                        phaseInfo = '(Pic d\'énergie et de bien-être)';
-                                    } else {
-                                        phase = 'Phase lutéale';
-                                        phaseInfo = '(Possible syndrome prémenstruel)';
-                                    }
-                                    
-                                    return `${context[0].label} - ${phase}
-${phaseInfo}`;
-                                }
-                            }
-                        }
                     }
                 }
             });
         }
         
-        // Générer les statistiques générales
         function renderGeneralStats() {
             const container = document.getElementById('general-stats');
             
@@ -822,11 +715,20 @@ ${phaseInfo}`;
                 return;
             }
             
-            // Calculer la tendance générale
-            const moodValues = moodEntries.map(entry => getMoodValue(entry.emoji));
+            const emojiValues = {
+                'very_happy': 5,
+                'happy': 4,
+                'neutral': 3,
+                'sad': 2,
+                'very_sad': 1,
+                'angry': 2,
+                'tired': 2.5,
+                'anxious': 2
+            };
+            
+            const moodValues = moodEntries.map(entry => emojiValues[entry.emoji] || 3);
             const avgMood = moodValues.reduce((sum, value) => sum + value, 0) / moodValues.length;
             
-            // Identifier l'humeur la plus fréquente
             const emojiCounts = {};
             moodEntries.forEach(entry => {
                 emojiCounts[entry.emoji] = (emojiCounts[entry.emoji] || 0) + 1;
@@ -852,82 +754,51 @@ ${phaseInfo}`;
                 'anxious': 'Anxieux(se)'
             };
             
-            // Générer le HTML
+            function getMoodLabel(value) {
+                if (value >= 4.5) return 'Excellente';
+                if (value >= 3.5) return 'Bonne';
+                if (value >= 2.5) return 'Neutre';
+                if (value >= 1.5) return 'Basse';
+                return 'Très basse';
+            }
+            
+            function formatDate(dateStr) {
+                if (!dateStr) return 'N/A';
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('fr-FR');
+            }
+            
             container.innerHTML = `
-                <div style="padding: 20px; line-height: 1.6;">
-                    <p><strong>Nombre d'entrées:</strong> ${moodEntries.length}</p>
-                    <p><strong>Humeur moyenne:</strong> ${getMoodLabel(avgMood)}</p>
-                    <p><strong>Humeur la plus fréquente:</strong> ${emojiLabels[mostFrequentEmoji] || 'N/A'}</p>
-                    <p><strong>Première entrée:</strong> ${formatDate(moodEntries[0]?.date)}</p>
-                    <p><strong>Dernière entrée:</strong> ${formatDate(moodEntries[moodEntries.length-1]?.date)}</p>
+                <div style="padding: 20px; line-height: 1.8; font-size: 16px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <strong>📊 Nombre d'entrées:</strong><br>
+                            <span style="font-size: 24px; color: #4CAF50;">${moodEntries.length}</span>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <strong>🎯 Humeur moyenne:</strong><br>
+                            <span style="font-size: 20px; color: #2196F3;">${getMoodLabel(avgMood)}</span>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <strong>😊 Humeur dominante:</strong><br>
+                            <span style="font-size: 18px; color: #FF9800;">${emojiLabels[mostFrequentEmoji] || 'N/A'}</span>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <strong>📅 Période analysée:</strong><br>
+                            <span style="font-size: 16px;">Du ${formatDate(moodEntries[0]?.date)} au ${formatDate(moodEntries[moodEntries.length-1]?.date)}</span>
+                        </div>
+                    </div>
                 </div>
             `;
         }
         
-        // Utilitaires
-        
-        // Obtenir une valeur numérique pour une humeur
-        function getMoodValue(emoji) {
-            const values = {
-                'very_happy': 5,
-                'happy': 4,
-                'neutral': 3,
-                'sad': 2,
-                'very_sad': 1,
-                'angry': 2,
-                'tired': 2.5,
-                'anxious': 2
-            };
-            return values[emoji] || 3;
-        }
-        
-        // Obtenir un label pour une valeur d'humeur
-        function getMoodLabel(value) {
-            if (value >= 4.5) return 'Excellente';
-            if (value >= 3.5) return 'Bonne';
-            if (value >= 2.5) return 'Neutre';
-            if (value >= 1.5) return 'Basse';
-            return 'Très basse';
-        }
-        
-        // Formater une date
-        function formatDate(dateStr) {
-            if (!dateStr) return 'N/A';
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('fr-FR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-        }
-        
-        // Mettre à jour la date des règles
         async function updateMenstrualDate() {
             const dateInput = document.getElementById('last-period-date');
             const newDate = dateInput.value;
             
-            // Validation de la date
             if (!newDate) {
                 alert('Veuillez sélectionner une date valide.');
                 return;
-            }
-            
-            const selectedDate = new Date(newDate);
-            const today = new Date();
-            
-            // Vérifier que la date n'est pas dans le futur
-            if (selectedDate > today) {
-                alert('La date ne peut pas être dans le futur.');
-                return;
-            }
-            
-            // Vérifier que la date n'est pas trop ancienne (max 3 mois)
-            const threeMonthsAgo = new Date();
-            threeMonthsAgo.setMonth(today.getMonth() - 3);
-            if (selectedDate < threeMonthsAgo) {
-                if (!confirm('La date sélectionnée remonte à plus de 3 mois. Êtes-vous sûre de vouloir continuer ?')) {
-                    return;
-                }
             }
             
             try {
@@ -943,35 +814,357 @@ ${phaseInfo}`;
                 
                 if (data.success) {
                     lastMenstrualDate = newDate;
-                    // Notification plus discrète
-                    const notification = document.createElement('div');
-                    notification.className = 'success-notification';
-                    notification.textContent = 'Date mise à jour avec succès!';
-                    document.body.appendChild(notification);
-                    setTimeout(() => notification.remove(), 3000);
-                    
-                    // Mettre à jour le graphique de corrélation
+                    showNotification('Date mise à jour avec succès!');
                     renderCycleCorrelationChart();
                 } else {
                     alert('Erreur lors de la mise à jour de la date: ' + (data.message || 'Erreur inconnue'));
                 }
             } catch (error) {
-                console.error('Erreur lors de la mise à jour de la date:', error);
+                console.error('Erreur:', error);
                 alert('Une erreur est survenue lors de la mise à jour de la date.');
             }
         }
         
-        // Mettre à jour les graphiques lors du changement de période
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'success-notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+        
+        async function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            
+            // Configuration
+            const pageWidth = 210;
+            const pageHeight = 297;
+            const margin = 15;
+            const contentWidth = pageWidth - (margin * 2);
+            
+            // Fonction pour nettoyer le texte et éviter les caractères problématiques
+            function cleanText(text) {
+                return text
+                    .replace(/[^\w\s\-\.\,\:\;\!\?\(\)\[\]\/\\]/g, '') // Garde seulement les caractères alphanumériques et ponctuation de base
+                    .replace(/\s+/g, ' ') // Remplace les espaces multiples par un seul
+                    .trim();
+            }
+            
+            // Titre principal
+            pdf.setFontSize(22);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(76, 175, 80);
+            pdf.text(cleanText('Analyse de votre humeur - MOODY'), margin, margin + 12);
+            
+            // Date de génération
+            pdf.setFontSize(11);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(0, 0, 0);
+            const today = new Date().toLocaleDateString('fr-FR');
+            pdf.text(cleanText(`Rapport genere le ${today}`), margin, margin + 25);
+            
+            // Période analysée
+            const period = document.getElementById('date-range').selectedOptions[0].text;
+            pdf.text(cleanText(`Periode: ${period}`), margin, margin + 35);
+            
+            let currentY = margin + 55;
+            
+            // Statistiques générales
+            pdf.setFontSize(16);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(76, 175, 80);
+            pdf.text(cleanText('Statistiques generales'), margin, currentY);
+            currentY += 12;
+            
+            if (moodEntries.length > 0) {
+                pdf.setFontSize(11);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setTextColor(0, 0, 0);
+                
+                const emojiValues = {
+                    'very_happy': 5, 'happy': 4, 'neutral': 3, 'sad': 2, 'very_sad': 1,
+                    'angry': 2, 'tired': 2.5, 'anxious': 2
+                };
+                
+                const moodValues = moodEntries.map(entry => emojiValues[entry.emoji] || 3);
+                const avgMood = moodValues.reduce((sum, value) => sum + value, 0) / moodValues.length;
+                
+                function getMoodLabel(value) {
+                    if (value >= 4.5) return 'Excellente';
+                    if (value >= 3.5) return 'Bonne';
+                    if (value >= 2.5) return 'Neutre';
+                    if (value >= 1.5) return 'Basse';
+                    return 'Très basse';
+                }
+                
+                const stats = [
+                    `• Nombre d'entrees: ${moodEntries.length}`,
+                    `• Humeur moyenne: ${getMoodLabel(avgMood)}`,
+                    `• Premiere entree: ${new Date(moodEntries[0]?.date).toLocaleDateString('fr-FR')}`,
+                    `• Derniere entree: ${new Date(moodEntries[moodEntries.length-1]?.date).toLocaleDateString('fr-FR')}`
+                ];
+                
+                stats.forEach(stat => {
+                    pdf.text(cleanText(stat), margin + 3, currentY);
+                    currentY += 7;
+                });
+                
+                currentY += 10;
+                
+                // Distribution des émojis
+                pdf.setFontSize(16);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(76, 175, 80);
+                pdf.text(cleanText('Distribution des emotions'), margin, currentY);
+                currentY += 12;
+                
+                const emojiCounts = {};
+                moodEntries.forEach(entry => {
+                    emojiCounts[entry.emoji] = (emojiCounts[entry.emoji] || 0) + 1;
+                });
+                
+                const emojiLabels = {
+                    'very_happy': 'Tres heureux',
+                    'happy': 'Heureux',
+                    'neutral': 'Neutre',
+                    'sad': 'Triste',
+                    'very_sad': 'Tres triste',
+                    'angry': 'En colere',
+                    'tired': 'Fatigue',
+                    'anxious': 'Anxieux'
+                };
+                
+                pdf.setFontSize(11);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setTextColor(0, 0, 0);
+                
+                Object.entries(emojiCounts).forEach(([emoji, count]) => {
+                    const percentage = Math.round((count / moodEntries.length) * 100);
+                    const text = `• ${emojiLabels[emoji] || emoji}: ${count} fois (${percentage}%)`;
+                    pdf.text(cleanText(text), margin + 3, currentY);
+                    currentY += 7;
+                });
+                
+                currentY += 10;
+                
+                // Moyennes des questions
+                pdf.setFontSize(16);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(76, 175, 80);
+                pdf.text(cleanText('Moyennes des evaluations'), margin, currentY);
+                currentY += 12;
+                
+                let q1Total = 0, q2Total = 0, q3Total = 0;
+                moodEntries.forEach(entry => {
+                    q1Total += entry.question1 || 0;
+                    q2Total += entry.question2 || 0;
+                    q3Total += entry.question3 || 0;
+                });
+                
+                const count = moodEntries.length;
+                const q1Avg = count > 0 ? (q1Total / count).toFixed(1) : 0;
+                const q2Avg = count > 0 ? (q2Total / count).toFixed(1) : 0;
+                const q3Avg = count > 0 ? (q3Total / count).toFixed(1) : 0;
+                
+                pdf.setFontSize(11);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setTextColor(0, 0, 0);
+                
+                const questionStats = [
+                    `• Niveau d'energie: ${q1Avg}/3`,
+                    `• Niveau de stress: ${q2Avg}/3`,
+                    `• Satisfaction de la journee: ${q3Avg}/3`
+                ];
+                
+                questionStats.forEach(stat => {
+                    pdf.text(cleanText(stat), margin + 3, currentY);
+                    currentY += 7;
+                });
+                
+                // Nouvelle page pour les graphiques
+                pdf.addPage();
+                currentY = margin + 20;
+                
+                // Capture des graphiques avec amélioration de la qualité
+                pdf.setFontSize(18);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(76, 175, 80);
+                pdf.text(cleanText('Graphiques detailles'), margin, currentY);
+                currentY += 20;
+                
+                try {
+                    // Fonction pour améliorer la qualité des graphiques
+                    function enhanceCanvasForPDF(canvas) {
+                        // Créer un nouveau canvas avec une résolution plus élevée
+                        const tempCanvas = document.createElement('canvas');
+                        const tempCtx = tempCanvas.getContext('2d');
+                        
+                        // Doubler la résolution
+                        tempCanvas.width = canvas.width * 2;
+                        tempCanvas.height = canvas.height * 2;
+                        
+                        // Améliorer la qualité
+                        tempCtx.imageSmoothingEnabled = true;
+                        tempCtx.imageSmoothingQuality = 'high';
+                        
+                        // Dessiner le canvas original avec une meilleure qualité
+                        tempCtx.scale(2, 2);
+                        tempCtx.drawImage(canvas, 0, 0);
+                        
+                        return tempCanvas.toDataURL('image/png', 1.0);
+                    }
+                    
+                    // Capturer le graphique d'évolution avec titre
+                    const timelineCanvas = document.getElementById('mood-timeline-chart');
+                    if (timelineCanvas && charts.timeline) {
+                        pdf.setFontSize(14);
+                        pdf.setFont('helvetica', 'bold');
+                        pdf.setTextColor(0, 0, 0);
+                        pdf.text(cleanText('Evolution de votre humeur dans le temps'), margin, currentY);
+                        currentY += 15;
+                        
+                        const timelineImage = enhanceCanvasForPDF(timelineCanvas);
+                        pdf.addImage(timelineImage, 'PNG', margin, currentY, contentWidth, 85);
+                        currentY += 100;
+                    }
+                    
+                    // Vérifier si on a besoin d'une nouvelle page
+                    if (currentY > pageHeight - 120) {
+                        pdf.addPage();
+                        currentY = margin + 20;
+                    }
+                    
+                    // Capturer le graphique de distribution
+                    const distributionCanvas = document.getElementById('emoji-distribution-chart');
+                    if (distributionCanvas && charts.distribution) {
+                        pdf.setFontSize(14);
+                        pdf.setFont('helvetica', 'bold');
+                        pdf.setTextColor(0, 0, 0);
+                        pdf.text(cleanText('Distribution des emotions'), margin, currentY);
+                        currentY += 15;
+                        
+                        const distributionImage = enhanceCanvasForPDF(distributionCanvas);
+                        const chartWidth = contentWidth * 0.75;
+                        const chartHeight = 75;
+                        const xOffset = (contentWidth - chartWidth) / 2;
+                        
+                        pdf.addImage(distributionImage, 'PNG', margin + xOffset, currentY, chartWidth, chartHeight);
+                        currentY += 90;
+                    }
+                    
+                    // Vérifier si on a besoin d'une nouvelle page
+                    if (currentY > pageHeight - 120) {
+                        pdf.addPage();
+                        currentY = margin + 20;
+                    }
+                    
+                    // Capturer le graphique des questions
+                    const questionsCanvas = document.getElementById('questions-avg-chart');
+                    if (questionsCanvas && charts.questions) {
+                        pdf.setFontSize(14);
+                        pdf.setFont('helvetica', 'bold');
+                        pdf.setTextColor(0, 0, 0);
+                        pdf.text(cleanText('Moyennes des reponses aux questions'), margin, currentY);
+                        currentY += 15;
+                        
+                        const questionsImage = enhanceCanvasForPDF(questionsCanvas);
+                        const chartWidth = contentWidth * 0.75;
+                        const chartHeight = 75;
+                        const xOffset = (contentWidth - chartWidth) / 2;
+                        
+                        pdf.addImage(questionsImage, 'PNG', margin + xOffset, currentY, chartWidth, chartHeight);
+                        currentY += 90;
+                    }
+                    
+                    // Capturer le graphique du cycle menstruel si applicable
+                    const cycleCanvas = document.getElementById('cycle-correlation-chart');
+                    if (cycleCanvas && charts.cycle && userGender === 'F') {
+                        // Vérifier si on a besoin d'une nouvelle page
+                        if (currentY > pageHeight - 120) {
+                            pdf.addPage();
+                            currentY = margin + 20;
+                        }
+                        
+                        pdf.setFontSize(14);
+                        pdf.setFont('helvetica', 'bold');
+                        pdf.setTextColor(255, 105, 180);
+                        pdf.text(cleanText('Correlation avec le cycle menstruel'), margin, currentY);
+                        currentY += 15;
+                        
+                        const cycleImage = enhanceCanvasForPDF(cycleCanvas);
+                        pdf.addImage(cycleImage, 'PNG', margin, currentY, contentWidth, 85);
+                    }
+                    
+                } catch (error) {
+                    console.error('Erreur lors de la capture des graphiques:', error);
+                    pdf.setFontSize(12);
+                    pdf.setTextColor(255, 0, 0);
+                    pdf.text(cleanText('Erreur lors de la generation des graphiques'), margin, currentY);
+                }
+                
+                // Ajouter une page de conclusion
+                pdf.addPage();
+                currentY = margin + 30;
+                
+                pdf.setFontSize(18);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(76, 175, 80);
+                pdf.text(cleanText('Conclusion et conseils'), margin, currentY);
+                currentY += 20;
+                
+                pdf.setFontSize(12);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setTextColor(0, 0, 0);
+                
+                const conclusions = [
+                    'Ce rapport vous donne un apercu detaille de votre humeur sur la periode selectionnee.',
+                    '',
+                    'Conseils pour ameliorer votre bien-etre :',
+                    '• Continuez a enregistrer votre humeur quotidiennement',
+                    '• Identifiez les patterns dans vos emotions',
+                    '• Consultez nos suggestions personnalisees',
+                    '• N\'hesitez pas a consulter un professionnel si necessaire',
+                    '',
+                    'L\'application MOODY vous accompagne dans votre bien-etre emotionnel.',
+                    'Prenez soin de vous !'
+                ];
+                
+                conclusions.forEach(line => {
+                    if (line === '') {
+                        currentY += 5;
+                    } else {
+                        const cleanedLine = cleanText(line);
+                        const lines = pdf.splitTextToSize(cleanedLine, contentWidth);
+                        pdf.text(lines, margin, currentY);
+                        currentY += lines.length * 6;
+                    }
+                });
+                
+            } else {
+                pdf.setFontSize(14);
+                pdf.setTextColor(255, 140, 0);
+                pdf.text(cleanText('Aucune donnee disponible pour la periode selectionnee.'), margin, currentY);
+                currentY += 20;
+                pdf.setFontSize(12);
+                pdf.setTextColor(0, 0, 0);
+                pdf.text(cleanText('Commencez a enregistrer votre humeur pour voir apparaitre des analyses detaillees.'), margin, currentY);
+            }
+            
+            // Télécharger le PDF
+            const filename = `moody_analyse_${today.replace(/\//g, '-')}.pdf`;
+            pdf.save(filename);
+            
+            showNotification('Rapport PDF telecharge avec succes!');
+        }
+        
         function updateCharts() {
             fetchMoodData();
         }
         
-        // Gérer la déconnexion
-        document.querySelector('.logout-btn').addEventListener('click', async function() {
+        async function logout() {
             try {
-                const response = await fetch('/api/logout', {
-                    method: 'POST',
-                });
+                const response = await fetch('/api/logout', { method: 'POST' });
                 const data = await response.json();
                 if (data.success) {
                     window.location.href = data.redirect || '/';
@@ -980,9 +1173,9 @@ ${phaseInfo}`;
                 console.error('Erreur lors de la déconnexion:', error);
                 window.location.href = '/';
             }
-        });
+        }
         
-        // Charger les données au chargement de la page
+        // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
             fetchMoodData();
         });

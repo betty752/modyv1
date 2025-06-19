@@ -1,0 +1,25 @@
+modules = ["web", "python-3.11", "nodejs-20"]
+run = "webapp.py"
+
+[nix]
+channel = "stable-24_05"
+packages = ["cairo", "ffmpeg-full", "freetype", "ghostscript", "glibcLocales", "gobject-introspection", "gtk3", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "pkg-config", "qhull", "tcl", "tk", "zlib"]
+
+[deployment]
+run = ["sh", "-c", "webapp.py"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[workflows]
+runButton = "Start Web App"
+
+[[workflows.workflow]]
+name = "Start Web App"
+author = 44008100
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python web_adapter/web_app.py"
